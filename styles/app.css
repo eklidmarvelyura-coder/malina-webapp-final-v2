@@ -1,0 +1,12 @@
+.app-shell{ display:flex; height:100vh; }
+.sidebar{
+  width:86px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:10px;
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid var(--glassBorder);
+}
+.content{ flex:1; padding:16px; overflow:auto; }

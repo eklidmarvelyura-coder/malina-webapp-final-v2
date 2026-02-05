@@ -1,0 +1,9 @@
+:root{
+  --malina:#ff4d6d;
+  --malinaDeep:#880e4f;
+  --bg:#0b0b10;
+
+  --glass: rgba(255,255,255,0.10);
+  --glassBorder: rgba(255,255,255,0.14);
+  --text:#f7f7fb;
+}

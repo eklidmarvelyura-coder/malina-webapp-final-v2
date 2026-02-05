@@ -1,0 +1,44 @@
+.glass{
+  background: var(--glass);
+  border: 1px solid var(--glassBorder);
+  backdrop-filter: blur(18px);
+  border-radius: 22px;
+  padding: 16px;
+}
+
+.page h1{ margin: 0 0 10px; }
+
+.nav-btn{
+  width:100%;
+  border:0;
+  background: rgba(255,255,255,0.12);
+  color:var(--text);
+  border-radius:18px;
+  padding:10px 6px;
+  margin-bottom:10px;
+  cursor:pointer;
+}
+.nav-btn:active{ transform: scale(0.98); }
+
+.primary{
+  width:100%;
+  border:0;
+  padding:14px 16px;
+  border-radius:18px;
+  color:white;
+  font-weight:800;
+  cursor:pointer;
+  background: linear-gradient(135deg, var(--malina), var(--malinaDeep));
+  box-shadow: 0 14px 30px rgba(136,14,79,0.25);
+}
+
+.input{
+  width:100%;
+  min-height:110px;
+  border-radius:16px;
+  padding:12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color: var(--text);
+  margin: 10px 0;
+}
