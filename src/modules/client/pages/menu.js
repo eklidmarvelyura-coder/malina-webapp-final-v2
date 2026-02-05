@@ -14,18 +14,25 @@ export function renderMenuPage(ctx) {
 
   // 1) Рисуем “скелет” страницы
   content.innerHTML = `
-    <div class="page glass">
-      <div class="page-header">
-        <h1>Меню</h1>
-        <p class="muted">Выберите блюда и напитки</p>
+  <div class="page glass">
+    <div class="page-header">
+      <div class="header-left">
+        <h1>🍓 Malina Cafe</h1>
+        <p class="muted">Кофе и выпечка с доставкой</p>
       </div>
 
-      <div class="categories" id="categories"></div>
-      <div class="grid" id="productsGrid"></div>
-
-      <button class="primary" id="checkoutBtn">Оформить заказ</button>
+      <div class="header-right">
+        <div class="header-pill" id="headerSum">0 ฿</div>
+      </div>
     </div>
-  `;
+
+    <div class="categories" id="categories"></div>
+    <div class="grid" id="productsGrid"></div>
+
+    <button class="primary" id="checkoutBtn">Оформить заказ</button>
+  </div>
+`;
+
 
   // 2) Монтируем модалку один раз (если ещё не создана)
   // В callbacks мы меняем store, а UI обновляем через store.subscribe ниже.
@@ -36,9 +43,10 @@ export function renderMenuPage(ctx) {
     });
   }
 
-  const elCats = content.querySelector("#categories");
-  const elGrid = content.querySelector("#productsGrid");
-  const elCheckout = content.querySelector("#checkoutBtn");
+  const elCats = content.querySelector("#categories"); // Контейнер для категорий
+  const elGrid = content.querySelector("#productsGrid"); // Сетка товаров
+  const elCheckout = content.querySelector("#checkoutBtn"); // Кнопка оформления заказа
+  const elHeaderSum = content.querySelector("#headerSum");  // Подписка на store для обновления суммы в шапке
 
   // 3) Категории (кнопки)
   elCats.innerHTML = CATEGORIES.map((c) => {
@@ -71,6 +79,8 @@ export function renderMenuPage(ctx) {
 
     // Обновляем текст кнопки оформления (приятный UX)
     const total = calcCartTotal(items, PRODUCT_BY_ID);
+    elHeaderSum.textContent = `${total} ฿`;
+
     elCheckout.textContent = total > 0 ? `Оформить заказ • ${total} ฿` : "Оформить заказ";
   }
 
