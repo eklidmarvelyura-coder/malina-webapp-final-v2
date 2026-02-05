@@ -14,7 +14,7 @@ export function renderMenuPage(ctx) {
 
   // 1) Рисуем “скелет” страницы
   content.innerHTML = `
-  <div class="page glass">
+  <div class="page glass menu-page">
     <div class="page-header">
       <div class="header-left">
         <h1>🍓 Malina Cafe</h1>

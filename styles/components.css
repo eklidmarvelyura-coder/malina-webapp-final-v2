@@ -34,13 +34,17 @@
 
 .input{
   width:100%;
-  min-height:110px;
+  min-height:120px;
+  resize: vertical;
   border-radius:16px;
   padding:12px;
   border: 1px solid rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.10);
   color: var(--text);
-  margin: 10px 0;
+  outline: none;
+}
+.input:focus{
+  border-color: rgba(255,77,109,0.6);
 }
 
 /* Сетка карточек */
@@ -145,4 +149,87 @@
   flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
+}
+/* ===== MODAL (clean) ===== */
+.modal.hidden{ display:none; }
+
+.modal{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.modal.active{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(136, 14, 79, 0.35);
+  backdrop-filter: blur(14px);
+}
+
+.modal-sheet{
+  position:absolute;
+  left:50%;
+  bottom: 0;
+  transform: translateX(-50%) translateY(16px);
+  width: min(480px, 100%);
+  background: rgba(255,255,255,0.90);
+  backdrop-filter: blur(18px);
+  border-radius: 26px 26px 0 0;
+  padding: 14px;
+  box-shadow: 0 -24px 60px rgba(136,14,79,0.28);
+  transition: transform 220ms cubic-bezier(.4,0,.2,1);
+}
+
+.modal.active .modal-sheet{
+  transform: translateX(-50%) translateY(0);
+}
+
+.modal-close{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:0;
+  cursor:pointer;
+  background: rgba(255,255,255,0.75);
+}
+
+.modal-image{
+  width:100%;
+  height: 190px;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+.modal-body{ padding: 10px 4px 6px; }
+.modal-title{ margin: 8px 0 6px; color:#120812; }
+.modal-desc{ margin: 0 0 10px; color: rgba(18,8,18,0.75); }
+
+.modal-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+}
+
+.modal-price{
+  font-weight: 900;
+  font-size: 20px;
+  color:#120812;
+}
+
+.modal-controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }

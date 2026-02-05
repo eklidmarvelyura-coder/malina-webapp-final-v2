@@ -10,3 +10,52 @@
   border-right: 1px solid var(--glassBorder);
 }
 .content{ flex:1; padding:16px; overflow:auto; }
+/* Sidebar items with labels */
+.nav-top{ display:flex; flex-direction:column; gap:10px; }
+.brand{
+  width:100%;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:18px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+.nav-item{
+  border:0;
+  width:100%;
+  background: rgba(255,255,255,0.10);
+  color: var(--text);
+  border-radius:18px;
+  padding:10px 6px;
+  cursor:pointer;
+}
+
+.nav-ico{ font-size: 20px; line-height: 1; }
+.nav-txt{ font-size: 11px; opacity: .9; margin-top: 6px; }
+
+.nav-bottom{ margin-top:auto; }
+
+.cart-widget{
+  padding:12px;
+  border-radius:20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.cart-row{
+  display:flex;
+  justify-content:space-between;
+  font-size: 12px;
+}
+
+.cart-label{ opacity: .85; }
+.cart-val{ font-weight: 800; }
+
+.cart-open-btn{
+  padding: 10px 12px;
+  border-radius: 16px;
+}

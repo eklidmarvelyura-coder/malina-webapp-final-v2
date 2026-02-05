@@ -1,13 +1,8 @@
 // src/shared/components/modal.js
-// Это “контроллер” модалки:
-// - createModal(): вставляет HTML один раз
-// - open(product): показывает
-// - close(): скрывает
-// - onAdd/onRemove: кнопки +/− работают через callbacks
+// Модалка как "bottom sheet": всегда поверх, всегда по центру снизу.
+// Важно: внутри модалки используем modal-controls, чтобы не конфликтовать с .controls на карточках.
 
 export function createProductModal({ onAdd, onRemove }) {
-  // Вставим модалку 1 раз в конец body.
-  // Дальше мы только обновляем контент и показываем/скрываем.
   const modal = document.createElement("div");
   modal.id = "productModal";
   modal.className = "modal hidden";
@@ -15,23 +10,23 @@ export function createProductModal({ onAdd, onRemove }) {
   modal.innerHTML = `
     <div class="modal-backdrop" data-action="close"></div>
 
-    <div class="modal-content" role="dialog" aria-modal="true">
+    <div class="modal-sheet" role="dialog" aria-modal="true">
       <button class="modal-close" data-action="close" aria-label="Закрыть">✕</button>
 
-      <div class="modal-img-wrapper">
-        <img id="modalImage" alt="">
-      </div>
+      <img id="modalImage" class="modal-image" alt="" />
 
-      <h2 id="modalTitle"></h2>
-      <p id="modalDescription"></p>
+      <div class="modal-body">
+        <h2 id="modalTitle" class="modal-title"></h2>
+        <p id="modalDescription" class="modal-desc"></p>
 
-      <div class="modal-footer">
-        <div id="modalPrice" class="modal-price"></div>
+        <div class="modal-row">
+          <div id="modalPrice" class="modal-price"></div>
 
-        <div class="controls">
-          <button class="ctrl-btn" id="modalMinus">−</button>
-          <span class="ctrl-count" id="modalCount">0</span>
-          <button class="ctrl-btn" id="modalPlus">+</button>
+          <div class="modal-controls">
+            <button class="ctrl-btn" id="modalMinus">−</button>
+            <span class="ctrl-count" id="modalCount">0</span>
+            <button class="ctrl-btn" id="modalPlus">+</button>
+          </div>
         </div>
       </div>
     </div>
@@ -56,33 +51,29 @@ export function createProductModal({ onAdd, onRemove }) {
 
     elImage.src = product.image;
     elImage.alt = product.name;
-
     elTitle.textContent = product.name;
     elDesc.textContent = product.description;
     elPrice.textContent = `${product.price} ฿`;
 
     setCount(count);
 
-    // Вариант B: hidden -> active (transition)
     modal.classList.remove("hidden");
-    // небольшой таймаут, чтобы браузер успел применить display и запустить transition
-    setTimeout(() => modal.classList.add("active"), 10);
+    requestAnimationFrame(() => modal.classList.add("active"));
   }
 
   function close() {
     modal.classList.remove("active");
-    // ждём окончание анимации, потом скрываем
-    setTimeout(() => modal.classList.add("hidden"), 350);
+    setTimeout(() => modal.classList.add("hidden"), 220);
     currentProductId = null;
   }
 
-  // Клик по фону/крестику закрывает
+  // Закрытие по фону/крестику
   modal.addEventListener("click", (e) => {
     const action = e.target?.dataset?.action;
     if (action === "close") close();
   });
 
-  // Кнопки +/-
+  // +/-
   modal.querySelector("#modalPlus").addEventListener("click", () => {
     if (!currentProductId) return;
     onAdd(currentProductId);
@@ -97,7 +88,6 @@ export function createProductModal({ onAdd, onRemove }) {
     open,
     close,
     setCount,
-    isOpen: () => !modal.classList.contains("hidden"),
     getCurrentId: () => currentProductId,
   };
 }
