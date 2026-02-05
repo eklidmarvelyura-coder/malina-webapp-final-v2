@@ -1,15 +1,12 @@
 // src/shared/components/productCard.js
-// Компонент карточки товара.
-// Мы возвращаем HTML-строку, чтобы быстро собирать список.
-// Позже можно перейти на DOM-элементы, но строка на старте проще.
+// Важно: кнопки +/− имеют data-action, а карточка имеет data-id.
+// Menu/Cart страницы ловят клики делегированием и меняют store.
 
-export function ProductCard({ product, count, onOpen, onAdd, onRemove, mode = "menu" }) {
-  // mode = "menu" | "cart"
-  // В меню показываем цену за 1 шт, в корзине можно показывать сумму за товар.
-  const priceText =
-    mode === "cart" ? `${product.price * count} ฿` : `${product.price} ฿`;
+export function ProductCard({ product, count, mode = "menu" }) {
+  const priceText = mode === "cart"
+    ? `${product.price * count} ฿`
+    : `${product.price} ฿`;
 
-  // Важно: клики по кнопкам НЕ должны открывать modal, поэтому stopPropagation.
   return `
     <div class="card product-card" data-id="${product.id}">
       <div class="card-click" data-action="open">
@@ -19,9 +16,9 @@ export function ProductCard({ product, count, onOpen, onAdd, onRemove, mode = "m
       </div>
 
       <div class="controls">
-        <button class="ctrl-btn" data-action="remove" aria-label="Уменьшить">−</button>
+        <button class="ctrl-btn" data-action="remove" type="button">−</button>
         <span class="ctrl-count">${count}</span>
-        <button class="ctrl-btn" data-action="add" aria-label="Увеличить">+</button>
+        <button class="ctrl-btn" data-action="add" type="button">+</button>
       </div>
     </div>
   `;

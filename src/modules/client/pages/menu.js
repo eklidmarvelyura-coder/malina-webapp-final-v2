@@ -14,22 +14,24 @@ export function renderMenuPage(ctx) {
 
   // 1) Рисуем “скелет” страницы
   content.innerHTML = `
-  <div class="page glass menu-page">
   <div class="page menu-page">
-    <div class="page-header">
-      <div class="header-left">
-        <h1>🍓 Malina Cafe</h1>
-        <p class="muted">Кофе и выпечка с доставкой</p>
+    <div class="menu-sticky">
+      <div class="page-header">
+        <div class="header-left">
+          <h1>🍓 Malina Cafe</h1>
+          <p class="muted">Кофе и выпечка с доставкой</p>
+        </div>
       </div>
+
+      <div class="categories" id="categories"></div>
     </div>
 
-    <div class="categories" id="categories"></div>
+    <div class="grid" id="productsGrid"></div>
+
+    <div class="menu-footer">
+      <button class="primary" id="checkoutBtn">Оформить заказ</button>
+    </div>
   </div>
-
-  <div class="grid" id="productsGrid"></div>
-
-  <button class="primary checkout-sticky" id="checkoutBtn">Оформить заказ</button>
-</div>
 `;
 
 
@@ -85,31 +87,22 @@ export function renderMenuPage(ctx) {
 
   // 5) Делегирование кликов по карточкам (один обработчик на весь список)
   elGrid.addEventListener("click", (e) => {
-    const card = e.target.closest(".product-card");
-    if (!card) return;
+  const card = e.target.closest(".product-card");
+  if (!card) return;
 
-    const id = Number(card.dataset.id);
-    const actionEl = e.target.closest("[data-action]");
-    const action = actionEl?.dataset?.action;
+  const id = Number(card.dataset.id);
+  const action = e.target.closest("[data-action]")?.dataset?.action;
 
-    // Если нажали на +/−
-    if (action === "add") {
-      store.cart.actions.add(id);
-      return;
-    }
-    if (action === "remove") {
-      store.cart.actions.remove(id);
-      return;
-    }
+  if (action === "add") return store.cart.actions.add(id);
+  if (action === "remove") return store.cart.actions.remove(id);
 
-    // Если нажали по кликабельной части карточки — открываем модалку
-    const openEl = e.target.closest('[data-action="open"]');
-    if (openEl) {
-      const product = PRODUCT_BY_ID[id];
-      const count = store.cart.selectors.getCount(id);
-      modalController.open(product, count);
-    }
-  });
+  // Открытие модалки — только если кликнули по card-click
+  if (e.target.closest('[data-action="open"]')) {
+    const product = PRODUCT_BY_ID[id];
+    const count = store.cart.selectors.getCount(id);
+    modalController.open(product, count);
+  }
+});
 
   // 6) Подписка на store: при любом изменении корзины обновляем UI
   // Важно: мы не создаём 100 подписок — но пока ок.
