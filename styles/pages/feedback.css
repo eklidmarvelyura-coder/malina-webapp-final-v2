@@ -1,0 +1,12 @@
+.feedback-form{
+  display:flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.feedback-form .input{
+  min-height: 140px;
+  width: 100%;
+  resize: vertical;
+}

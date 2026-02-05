@@ -21,15 +21,14 @@ export function renderMenuPage(ctx) {
         <p class="muted">Кофе и выпечка с доставкой</p>
       </div>
 
-      <div class="header-right">
-        <div class="header-pill" id="headerSum">0 ฿</div>
-      </div>
+      
     </div>
 
     <div class="categories" id="categories"></div>
     <div class="grid" id="productsGrid"></div>
 
-    <button class="primary" id="checkoutBtn">Оформить заказ</button>
+    <button class="primary checkout-sticky" id="checkoutBtn">Оформить заказ</button>
+
   </div>
 `;
 
@@ -79,7 +78,7 @@ export function renderMenuPage(ctx) {
 
     // Обновляем текст кнопки оформления (приятный UX)
     const total = calcCartTotal(items, PRODUCT_BY_ID);
-    elHeaderSum.textContent = `${total} ฿`;
+    //elHeaderSum.textContent = `${total} ฿`;
 
     elCheckout.textContent = total > 0 ? `Оформить заказ • ${total} ฿` : "Оформить заказ";
   }

@@ -9,15 +9,15 @@
 }
 
 /* Сетка карточек */
+/* Меню: на desktop пусть карточки выравниваются аккуратно слева,
+   но весь блок остаётся центрированным через max-width страницы */
 .grid{
   display:flex;
   flex-wrap:wrap;
-  gap:12px;
-  justify-content:center;
-  align-content:flex-start;
-  padding-bottom: 90px; /* место под sticky кнопку */
+  gap: 18px;
+  justify-content: flex-start; /* было center */
+  padding-bottom: 90px;
 }
-
 /* Карточка фиксированного размера */
 .product-card{
   width:300px;
