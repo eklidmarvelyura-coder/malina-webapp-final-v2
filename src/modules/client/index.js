@@ -1,5 +1,5 @@
 import { registerRoute, navigate } from "../../shared/router.js";
-import { renderClientNav } from "./pages/_nav.js";
+import { renderClientNav } from "./pages/nav.js";
 
 import { renderMenuPage } from "./pages/menu.js";
 import { renderCartPage } from "./pages/cart.js";
