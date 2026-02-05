@@ -154,13 +154,17 @@
 .modal.hidden{ display:none; }
 
 /* модалку анимируем только opacity */
+/* ===== MODAL (stable for Telegram WebView) ===== */
+.modal.hidden { display: none; }
+
 .modal{
   position: fixed;
   inset: 0;
   z-index: 9999;
+
   opacity: 0;
   pointer-events: none;
-  transition: opacity 220ms ease;
+  transition: opacity 200ms ease;
 }
 
 .modal.active{
@@ -168,50 +172,36 @@
   pointer-events: auto;
 }
 
+/* Фон БЕЗ blur — это убирает "рывок" */
 .modal-backdrop{
   position:absolute;
   inset:0;
-  background: rgba(136, 14, 79, 0.35);
-
-  /* blur всегда один и тот же */
-  backdrop-filter: blur(14px);
-
-  /* НИКАКИХ transition тут */
+  background: rgba(10, 10, 16, 0.55);
 }
 
-/* sheet анимируем только transform */
+/* Стекло делаем только на sheet */
 .modal-sheet{
   position:absolute;
   left:50%;
   bottom: 0;
   transform: translateX(-50%) translateY(18px);
   width: min(480px, 100%);
-  background: rgba(255,255,255,0.92);
   border-radius: 26px 26px 0 0;
   padding: 14px;
-  box-shadow: 0 -24px 60px rgba(136,14,79,0.28);
+  box-shadow: 0 -24px 60px rgba(0,0,0,0.35);
 
-  /* ВАЖНО: только transform */
-  transition: transform 220ms cubic-bezier(.4,0,.2,1);
+  /* стекло на sheet */
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 
-  /* Подсказка браузеру: готовь слой заранее */
+  transition: transform 200ms cubic-bezier(.4,0,.2,1);
   will-change: transform;
 }
 
 .modal.active .modal-sheet{
   transform: translateX(-50%) translateY(0);
-}
-
-.modal-close{
-  position:absolute;
-  top:10px;
-  right:10px;
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  border:0;
-  cursor:pointer;
-  background: rgba(255,255,255,0.75);
 }
 
 .modal-image{
@@ -221,9 +211,8 @@
   border-radius: 18px;
 }
 
-.modal-body{ padding: 10px 4px 6px; }
-.modal-title{ margin: 8px 0 6px; color:#120812; }
-.modal-desc{ margin: 0 0 10px; color: rgba(18,8,18,0.75); }
+.modal-title{ margin: 10px 0 6px; }
+.modal-desc{ margin: 0 0 10px; opacity: .9; }
 
 .modal-row{
   display:flex;
@@ -235,16 +224,10 @@
 .modal-price{
   font-weight: 900;
   font-size: 20px;
-  color:#120812;
 }
 
-.modal-controls{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-/* В модалке фон светлый → текст должен быть тёмным */
+/* чтобы счётчик не сливался */
 .modal .ctrl-count{
-  color: #120812;
+  color: #fff;
   font-weight: 900;
 }

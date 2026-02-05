@@ -7,8 +7,8 @@ export function renderClientNav(sidebar, ctx) {
 
   sidebar.innerHTML = `
     <div class="nav-top">
-      <div class="brand">🍓</div>
-      <div class="nav-txt">Малинка</div>
+      <div class="brand">🍓Карта📌</div>
+      
 
       <button class="nav-item" data-go="menu">
         <div class="nav-ico">🍽</div>
