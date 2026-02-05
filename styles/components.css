@@ -153,6 +153,7 @@
 /* ===== MODAL (clean) ===== */
 .modal.hidden{ display:none; }
 
+/* модалку анимируем только opacity */
 .modal{
   position: fixed;
   inset: 0;
@@ -171,21 +172,30 @@
   position:absolute;
   inset:0;
   background: rgba(136, 14, 79, 0.35);
+
+  /* blur всегда один и тот же */
   backdrop-filter: blur(14px);
+
+  /* НИКАКИХ transition тут */
 }
 
+/* sheet анимируем только transform */
 .modal-sheet{
   position:absolute;
   left:50%;
   bottom: 0;
-  transform: translateX(-50%) translateY(16px);
+  transform: translateX(-50%) translateY(18px);
   width: min(480px, 100%);
-  background: rgba(255,255,255,0.90);
-  backdrop-filter: blur(18px);
+  background: rgba(255,255,255,0.92);
   border-radius: 26px 26px 0 0;
   padding: 14px;
   box-shadow: 0 -24px 60px rgba(136,14,79,0.28);
+
+  /* ВАЖНО: только transform */
   transition: transform 220ms cubic-bezier(.4,0,.2,1);
+
+  /* Подсказка браузеру: готовь слой заранее */
+  will-change: transform;
 }
 
 .modal.active .modal-sheet{
@@ -232,4 +242,9 @@
   display:flex;
   align-items:center;
   gap:10px;
+}
+/* В модалке фон светлый → текст должен быть тёмным */
+.modal .ctrl-count{
+  color: #120812;
+  font-weight: 900;
 }

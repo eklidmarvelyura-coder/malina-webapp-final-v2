@@ -18,6 +18,9 @@
   justify-content: flex-start; /* было center */
   padding-bottom: 90px;
 }
+@media (max-width: 640px){ /* на узких экранах центрируем */
+  .grid{ justify-content: center; }
+}
 /* Карточка фиксированного размера */
 .product-card{
   width:300px;
@@ -26,7 +29,12 @@
   overflow:hidden;
   display:flex;
   flex-direction:column;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(16px);
 }
+
+
 
 /* Кликабельная часть карточки */
 .card-click{
@@ -55,4 +63,19 @@
   position: sticky;
   bottom: 12px;
   margin-top:auto;
+}
+ 
+.menu-sticky{ /* Заголовок страницы при прокрутке */
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  padding: 14px 14px 10px;
+  border-radius: 22px;
+  margin-bottom: 12px;
+
+  /* чтобы при прокрутке было ощущение стекла */
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(18px);
 }

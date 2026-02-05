@@ -10,3 +10,9 @@
   width: 100%;
   resize: vertical;
 }
+.feedback-form .primary{
+  width: 100%;
+}
+.feedback-form .input{
+  width: 100%;
+}
