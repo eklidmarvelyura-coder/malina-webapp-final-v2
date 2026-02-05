@@ -8,6 +8,7 @@ export function renderClientNav(sidebar, ctx) {
   sidebar.innerHTML = `
     <div class="nav-top">
       <div class="brand">🍓</div>
+      <div class="nav-txt">Малинка</div>
 
       <button class="nav-item" data-go="menu">
         <div class="nav-ico">🍽</div>
@@ -35,7 +36,8 @@ export function renderClientNav(sidebar, ctx) {
           <span class="cart-label">Сумма:</span>
           <span class="cart-val" id="cartSum">0 ฿</span>
         </div>
-        <button class="primary cart-open-btn" id="openCartBtn">Открыть</button>
+        <div class="cart-open-link" id="openCartBtn">Открыть →</div>
+
       </div>
     </div>
   `;
