@@ -15,21 +15,21 @@ export function renderMenuPage(ctx) {
   // 1) Рисуем “скелет” страницы
   content.innerHTML = `
   <div class="page glass menu-page">
+  <div class="page menu-page">
     <div class="page-header">
       <div class="header-left">
         <h1>🍓 Malina Cafe</h1>
         <p class="muted">Кофе и выпечка с доставкой</p>
       </div>
-
-      
     </div>
 
     <div class="categories" id="categories"></div>
-    <div class="grid" id="productsGrid"></div>
-
-    <button class="primary checkout-sticky" id="checkoutBtn">Оформить заказ</button>
-
   </div>
+
+  <div class="grid" id="productsGrid"></div>
+
+  <button class="primary checkout-sticky" id="checkoutBtn">Оформить заказ</button>
+</div>
 `;
 
 
