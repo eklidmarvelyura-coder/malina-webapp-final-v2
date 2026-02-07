@@ -452,3 +452,128 @@
   max-width: 640px;
   width: min(640px, calc(100vw - 28px)) !important;
 }
+/* ============================================================
+   MAP MODAL — stable center on mobile + bigger map on desktop
+   Причины фикса:
+   - 100vw в WebView иногда "шире" экрана → модалка уезжает вправо
+   - маленькая карта → увеличиваем frame + делаем flex layout
+   ============================================================ */
+
+#mapModal{
+  position: fixed !important;
+  inset: 0 !important;
+
+  /* ВАЖНО: не используем 100vw/100vh — именно width/height 100% */
+  width: 100% !important;
+  height: 100% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 14px !important;
+  margin: 0 !important;
+
+  overflow: hidden !important;
+  z-index: 9999 !important;
+}
+
+#mapModal .modal-backdrop{
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(10,10,14,0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* sheet — делаем flex колонку, чтобы карта занимала место */
+#mapModal .modal-sheet{
+  position: relative !important;
+  z-index: 2 !important;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  /* ширина нормальная и на десктопе и на мобиле */
+  width: min(720px, calc(100% - 28px)) !important;
+  max-width: 720px;
+
+  border-radius: 22px;
+  padding: 14px;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+
+  /* чуть приятнее */
+  transform: translateY(6px) scale(0.99);
+  opacity: 0;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+#mapModal.active .modal-sheet{
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* карта — делаем реально большую */
+#mapModal .map-frame{
+  width: 100%;
+  height: 420px;              /* ⬅️ было мало — делаем вкусно */
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+}
+
+#mapModal .map-frame iframe{
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* кнопка */
+#mapModal .map-actions{
+  margin-top: 0;
+}
+
+/* close */
+#mapModal .modal-close{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  width: 36px;
+  height: 36px;
+  border-radius: 14px;
+
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* мобилка: карта чуть ниже по высоте + учитываем “высоту динамической панели” */
+@media (max-width: 480px){
+  #mapModal{
+    padding: 10px !important;
+  }
+  #mapModal .modal-sheet{
+    width: calc(100% - 20px) !important;
+  }
+  #mapModal .map-frame{
+    height: 300px;
+  }
+}
+
+/* iOS/Telegram WebView иногда любит “прыгающую” высоту */
+@supports (height: 100dvh){
+  #mapModal{
+    height: 100dvh !important;
+  }
+}
