@@ -20,7 +20,10 @@ export function openCafeMapModal() {
     `${lon - 0.01}%2C${lat - 0.01}%2C${lon + 0.01}%2C${lat + 0.01}` +
     `&layer=mapnik&marker=${lat}%2C${lon}`;
 
-  const gmapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+  const gmapsUrl = CAFE.googlePlaceId
+  ? `https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(CAFE.googlePlaceId)}`
+  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(CAFE.googleQuery || `${lat},${lon}`)}`;
+
 
   overlay.innerHTML = `
     <div class="modal-backdrop" id="mapBackdrop"></div>
