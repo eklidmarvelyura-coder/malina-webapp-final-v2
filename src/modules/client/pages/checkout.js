@@ -206,18 +206,19 @@ export function renderCheckoutPage(ctx) {
       };
 
       if (tg?.sendData) {
-        tg.sendData(JSON.stringify(payload));
-        alert("Заказ отправлен ✅");
-      } else {
-        console.log("ORDER PAYLOAD:", payload);
-        alert("Открыто не в Telegram — payload в консоли ✅");
-      }
+    tg.sendData(JSON.stringify(payload));
+  } else {
+    console.log("ORDER PAYLOAD:", payload);
+  }
 
-      // отправили payload...
-       store.cart.actions.clear();     // ✅ очищаем корзину
-       navigate("success", ctx);       // ✅ красивый экран "принято"
+  // ✅ ВОТ ЭТИ 2 СТРОКИ — КЛЮЧ
+  ctx.store.cart.actions.clear();
+  navigate("success", ctx);
+};
+console.log("COUNT BEFORE CLEAR:", ctx.store.cart.selectors.countAll());
+ctx.store.cart.actions.clear();
+console.log("COUNT AFTER CLEAR:", ctx.store.cart.selectors.countAll());
 
-    };
   }
 
   render();
