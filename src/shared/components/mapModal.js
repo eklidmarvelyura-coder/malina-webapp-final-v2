@@ -3,6 +3,8 @@
 
 import { CAFE } from "../../config.js";
 import { toast } from "./toast.js";
+const tg = window.Telegram?.WebApp;
+
 
 export function openCafeMapModal() {
   // если уже открыта — не плодим
@@ -63,10 +65,14 @@ export function openCafeMapModal() {
 
   overlay.querySelector("#openGoogleMaps").onclick = () => {
     // В WebView иногда лучше открывать в системном браузере
-    try {
-      window.open(gmapsUrl, "_blank");
-    } catch {
-      toast.info("Не удалось открыть ссылки, попробуй вручную", 2600);
-    }
+   try {
+  if (tg?.openLink) {
+    tg.openLink(gmapsUrl);
+  } else {
+    window.open(gmapsUrl, "_blank");
+  }
+} catch {
+  toast.info("Не удалось открыть Google Maps. Попробуй ещё раз.", 2600);
+}
   };
 }

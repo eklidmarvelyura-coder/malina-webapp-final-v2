@@ -11,18 +11,25 @@ export function cartStore() {
 
   // ---- селекторы (чтение) ----
   const selectors = {
-    // Вернём КОПИЮ, чтобы никто снаружи не мутировал напрямую
-    items() {
-      return { ...items };
-    },
+  // Вернём КОПИЮ, чтобы никто снаружи не мутировал напрямую
+  items() {
+    return { ...items };
+  },
 
-    // Сколько всего единиц товара в корзине (для badge)
-    countAll() {
-      let c = 0;
-      for (const id in items) c += Number(items[id] || 0);
-      return c;
-    },
-  };
+  // ✅ Количество конкретного товара (для модалки/карточки)
+  getCount(id) {
+    const key = String(id);
+    return Number(items[key] || 0);
+  },
+
+  // Сколько всего единиц товара в корзине (для badge)
+  countAll() {
+    let c = 0;
+    for (const id in items) c += Number(items[id] || 0);
+    return c;
+  },
+};
+
 
   // ---- actions (изменения) ----
   const actions = {
