@@ -204,7 +204,7 @@ export function renderCheckoutPage(ctx) {
 
       // ✅ очищаем корзину и уходим на success
       store.cart.actions.clear();
-      navigate("success", ctx);
+      navigate("success", ctx); // после отправки заказа показываем страницу успеха 
     };
   }
 
