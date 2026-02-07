@@ -4,12 +4,7 @@ import { navigate } from "../../../shared/router.js";
 
 function formatDate(ts) {
   const d = new Date(ts);
-  return d.toLocaleString("ru-RU", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return d.toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
 
 export function renderOrdersPage(ctx) {
@@ -19,6 +14,7 @@ export function renderOrdersPage(ctx) {
     <div class="menu-sticky glass">
       <div id="ordersHeader"></div>
     </div>
+
     <div class="orders-wrap" id="ordersWrap"></div>
   `;
 
@@ -27,7 +23,7 @@ export function renderOrdersPage(ctx) {
   const wrap = content.querySelector("#ordersWrap");
 
   function render() {
-    const orders = store.orders?.selectors?.all?.() || [];
+    const orders = store.orders.selectors.all();
 
     if (!orders.length) {
       wrap.innerHTML = `
@@ -44,9 +40,7 @@ export function renderOrdersPage(ctx) {
 
     wrap.innerHTML = `
       <div class="orders-list">
-        ${orders
-          .map(
-            (o) => `
+        ${orders.map(o => `
           <div class="order-card glass-lite">
             <div class="order-top">
               <div>
@@ -63,28 +57,17 @@ export function renderOrdersPage(ctx) {
             </div>
 
             <div class="order-items">
-              ${o.items
-                .slice(0, 4)
-                .map(
-                  (it) => `
+              ${o.items.slice(0, 4).map(it => `
                 <div class="order-item-row">
                   <span>${it.name}</span>
                   <span class="muted">× ${it.qty}</span>
                   <span>${it.sum} ฿</span>
                 </div>
-              `
-                )
-                .join("")}
-              ${
-                o.items.length > 4
-                  ? `<div class="muted" style="margin-top:8px;">и ещё ${o.items.length - 4} позиций…</div>`
-                  : ""
-              }
+              `).join("")}
+              ${o.items.length > 4 ? `<div class="muted" style="margin-top:8px;">и ещё ${o.items.length - 4} позиций…</div>` : ""}
             </div>
           </div>
-        `
-          )
-          .join("")}
+        `).join("")}
       </div>
     `;
   }
@@ -93,8 +76,6 @@ export function renderOrdersPage(ctx) {
   const unsub = store.subscribe(() => render());
 
   return () => {
-    try {
-      unsub?.();
-    } catch (_) {}
+    try { unsub?.(); } catch (_) {}
   };
 }

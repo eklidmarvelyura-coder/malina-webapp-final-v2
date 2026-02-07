@@ -1,0 +1,50 @@
+/* styles/pages/orders.css */
+.orders-wrap { padding: 0 18px 120px; }
+
+.orders-list{
+  display:flex;
+  flex-direction:column;
+  gap: 14px;
+}
+
+.order-card{
+  padding: 14px;
+  border-radius: var(--r22);
+}
+
+.order-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.order-id{
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.order-total{
+  font-weight: 900;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.order-meta{
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.order-items{
+  margin-top: 12px;
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+}
+
+.order-item-row{
+  display:grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items:center;
+}

@@ -250,6 +250,20 @@ export function renderCheckoutPage(ctx) {
 
       if (tg?.sendData) tg.sendData(JSON.stringify(payload));
       else console.log("ORDER PAYLOAD:", payload);
+      // ✅ сохраняем заказ локально в историю (MVP)
+        const orderId = "MAL-" + payload.createdAt;
+        store.orders.actions.add({
+        id: orderId,
+        createdAt: payload.createdAt,
+         status: "Отправлен",
+        mode: payload.mode,
+        total: payload.order.total,
+        items: payload.order.items.map(x => ({
+        id: x.id, name: x.name, qty: x.qty, sum: x.sum
+  })),
+  user: payload.user,
+  geo: payload.geo,
+});
 
       toast.success("Заказ отправлен ✅");
 

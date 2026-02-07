@@ -14,6 +14,7 @@ import { renderFeedbackPage } from "./pages/feedback.js";
 import { renderCheckoutPage } from "./pages/checkout.js";
 import { renderAboutPage } from "./pages/about.js";
 import { renderSuccessPage } from "./pages/success.js";
+import { renderOrdersPage } from "./pages/orders.js";
 
 
 import { navigate, setCleanup } from "../../shared/router.js";
@@ -45,6 +46,8 @@ export function mountClientApp(store, tg) {
         else if (route === "checkout") cleanup = renderCheckoutPage(ctx); //  новая страница оформления заказа
         else if (route === "about") cleanup = renderAboutPage(ctx); // временно, пока "Мы на карте" в разработке
         else if (route === "success") cleanup = renderSuccessPage(ctx); // страница успеха после оформления заказа
+        else if (route === "orders") cleanup = renderOrdersPage(ctx); // страница со списком заказов (для тестов и отладки)
+
         else cleanup = renderMenuPage(ctx);
       } catch (err) {
         console.error("Page render failed:", route, err);
