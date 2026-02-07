@@ -4,6 +4,9 @@ import { renderClientNav } from "./pages/nav.js";
 import { renderMenuPage } from "./pages/menu.js";
 import { renderCartPage } from "./pages/cart.js";
 import { renderFeedbackPage } from "./pages/feedback.js";
+
+// ВАЖНО: about может быть временно отсутствующим.
+// Мы импортируем его, но ещё и страхуемся try/catch при рендере.
 import { renderAboutPage } from "./pages/about.js";
 
 import { navigate, setCleanup } from "../../shared/router.js";
@@ -26,19 +29,22 @@ export function mountClientApp(store, tg) {
     render: (route) => {
       let cleanup = null;
 
-      if (route === "menu") cleanup = renderMenuPage(ctx);
-      else if (route === "cart") cleanup = renderCartPage(ctx);
-      else if (route === "feedback") cleanup = renderFeedbackPage(ctx);
-      else if (route === "about") cleanup = renderAboutPage(ctx);
-      else cleanup = renderMenuPage(ctx);
+      try {
+        if (route === "menu") cleanup = renderMenuPage(ctx);
+        else if (route === "cart") cleanup = renderCartPage(ctx);
+        else if (route === "feedback") cleanup = renderFeedbackPage(ctx);
+        else if (route === "about") cleanup = renderAboutPage(ctx);
+        else cleanup = renderMenuPage(ctx);
+      } catch (err) {
+        console.error("Page render failed:", route, err);
+        // fallback, чтобы приложение не умирало
+        cleanup = renderMenuPage(ctx);
+      }
 
       setCleanup(cleanup);
     },
   };
 
-  // Sidebar один раз
   renderClientNav(sidebar, ctx);
-
-  // Старт
   navigate("menu", ctx);
 }
