@@ -109,7 +109,7 @@
   margin: 10px 0 6px;
   font-size: 20px;
   letter-spacing: -0.2px;
- 
+}
 .price{
   font-weight: 900;
   opacity: 0.95;
@@ -339,41 +339,4 @@
 }
 .toast-info{
   border-color: rgba(255,255,255,0.14);
-}
-
-/* =========================
-   MAP MODAL
-   ========================= */
-.map-head{
-  padding: 4px 4px 10px;
-}
-.map-title{
-  font-weight: 900;
-  font-size: 16px;
-  margin-bottom: 4px;
-}
-
-.map-frame{
-  width:100%;
-  height: 320px;
-  border-radius: 18px;
-  overflow:hidden;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-}
-.map-frame iframe{
-  width:100%;
-  height:100%;
-  border:0;
-}
-
-.map-actions{
-  margin-top: 12px;
-}
-
-/* чтобы длинные строки не распирали контейнер */
-.sum-name,
-.nav-txt,
-h1, h2, h3, p{
-  overflow-wrap: anywhere;
 }
