@@ -1,65 +1,89 @@
+// src/modules/client/pages/nav.js
+// Клиентский sidebar.
+// Принципы (важно понять):
+// 1) Sidebar — это "вид", он НЕ хранит данные.
+// 2) Данные берём из store (cartStore), чтобы всё было синхронно.
+// 3) Сайдбар подписывается на store.subscribe(), чтобы сумма обновлялась мгновенно.
+
 import { navigate } from "../../../shared/router.js";
 import { PRODUCT_BY_ID } from "../../../shared/data/products.js";
 import { calcCartTotal } from "../../../shared/utils/cartTotals.js";
 
 export function renderClientNav(sidebar, ctx) {
-  const { store } = ctx;
-
+  // 1) Рендерим навигацию БЕЗ нижней панели
   sidebar.innerHTML = `
     <div class="nav-top">
-      <button class="nav-item" data-go="map">
-        <div class="nav-ico">🍓</div>
-        <div class="nav-txt">Карта 📌</div>
-      </button>
+      <div class="brand">🍓</div>
 
-      <button class="nav-item" data-go="menu">
+      <button class="nav-item" data-route="menu">
         <div class="nav-ico">🍽</div>
         <div class="nav-txt">Меню</div>
       </button>
 
-      <button class="nav-item" data-go="cart">
+      <button class="nav-item" data-route="cart" id="navCartBtn">
         <div class="nav-ico">🛒</div>
         <div class="nav-txt">Корзина</div>
+        <span class="nav-badge hidden" id="cartBadge">0</span>
       </button>
 
-      <button class="nav-item" data-go="feedback">
+      <button class="nav-item" data-route="feedback">
         <div class="nav-ico">💬</div>
         <div class="nav-txt">Связь</div>
       </button>
     </div>
-
-    <div class="nav-bottom">
-      <div class="cart-widget glass" id="cartWidget">
-        <div class="cart-row">
-          <span class="cart-label">Товаров:</span>
-          <span class="cart-val" id="cartItemsCount">0</span>
-        </div>
-        <div class="cart-row">
-          <span class="cart-label">Сумма:</span>
-          <span class="cart-val" id="cartSum">0 ฿</span>
-        </div>
-      
-    </div>
   `;
 
-  sidebar.querySelectorAll("[data-go]").forEach((btn) => {
+  // 2) Навигация по клику + активное состояние
+  const buttons = Array.from(sidebar.querySelectorAll(".nav-item"));
+
+  function setActive(route) {
+    buttons.forEach(b => b.classList.toggle("active", b.dataset.route === route));
+  }
+
+  buttons.forEach(btn => {
     btn.addEventListener("click", () => {
-      if (btn.dataset.go === "map") return navigate("about", ctx); // пока так
-      navigate(btn.dataset.go, ctx);
+      const route = btn.dataset.route;
+      setActive(route);
+      navigate(route, ctx);
     });
   });
 
-  sidebar.querySelector("#cartWidget").addEventListener("click", () => navigate("cart", ctx));
+  // 3) Badge: количество товаров в корзине
+  const badge = sidebar.querySelector("#cartBadge");
 
-  const elCount = sidebar.querySelector("#cartItemsCount");
-  const elSum = sidebar.querySelector("#cartSum");
-
-  function renderWidget() {
-    const items = store.cart.selectors.items();
-    elCount.textContent = String(store.cart.selectors.countAll());
-    elSum.textContent = `${calcCartTotal(items, PRODUCT_BY_ID)} ฿`;
+  function calcItemsCount(cartState) {
+    // Поддержим обе структуры:
+    // a) cart.items = { [id]: qty }
+    // b) cart = { [id]: qty }
+    const items = cartState?.items ?? cartState ?? {};
+    let count = 0;
+    for (const k in items) count += Number(items[k] || 0);
+    return count;
   }
 
-  renderWidget();
-  store.subscribe(renderWidget);
+  function updateBadge() {
+    const cartState = ctx.store.getState().cart;
+    const count = calcItemsCount(cartState);
+
+    if (count > 0) {
+      badge.textContent = String(count);
+      badge.classList.remove("hidden");
+    } else {
+      badge.textContent = "0";
+      badge.classList.add("hidden");
+    }
+  }
+
+  updateBadge();
+
+  // подписка на store, чтобы badge обновлялся всегда
+  const unsub = ctx.store.subscribe(() => {
+    updateBadge();
+  });
+
+  // выставляем активную при старте
+  setActive(ctx.route || "menu");
+
+  // cleanup — важно, чтобы не копились подписки при перемонтировании
+  return () => unsub?.();
 }

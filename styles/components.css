@@ -255,3 +255,39 @@
   font-size: 20px;
 }
 .modal .ctrl-count{ color:#fff; }
+
+/* =========================
+   NAV BADGE (cart count)
+   ========================= */
+
+.nav-item{
+  position: relative; /* база для badge */
+}
+
+.nav-badge{
+  position: absolute;
+  top: 10px;
+  right: 12px;
+
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  color: #fff;
+
+  background: linear-gradient(135deg, var(--malina), var(--malinaDeep));
+  box-shadow: 0 14px 30px rgba(255,63,122,0.22);
+
+  transform: translate(35%, -35%);
+}
+
+.nav-badge.hidden{
+  display:none;
+}
