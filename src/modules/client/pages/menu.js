@@ -1,42 +1,30 @@
-// src/modules/client/pages/menu.js
 import { PRODUCTS, PRODUCT_BY_ID, CATEGORIES } from "../../../shared/data/products.js";
 import { ProductCard } from "../../../shared/components/productCard.js";
 import { createProductModal } from "../../../shared/components/modal.js";
 import { calcCartTotal } from "../../../shared/utils/cartTotals.js";
+import { renderHeader } from "../../../shared/ui/header.js";
 
 let modalController = null;
-// category хранится внутри модуля страницы, не в store (пока)
 let currentCategory = "all";
 
 export function renderMenuPage(ctx) {
-  const { store, tg } = ctx;
-  const content = document.getElementById("content");
+  const { store, tg, content } = ctx;
 
-  // 1) Рисуем “скелет” страницы
   content.innerHTML = `
-  <div class="page menu-page">
-    <div class="menu-sticky">
-      <div class="page-header">
-        <div class="header-left">
-          <h1>🍓 Malina Cafe</h1>
-          <p class="muted">Кофе и выпечка с доставкой</p>
-        </div>
-      </div>
-
-      <div class="categories" id="categories"></div>
-    </div>
-
+    <div class="menu-sticky glass" id="menuSticky"></div>
+    <div class="categories" id="categories"></div>
     <div class="grid" id="productsGrid"></div>
 
-    <div class="menu-footer">
+    <div class="menu-footer glass">
       <button class="primary" id="checkoutBtn">Оформить заказ</button>
     </div>
-  </div>
-`;
+  `;
 
+  // общий header
+  renderHeader(document.getElementById("menuSticky"), {
+    subtitle: "Кофе и выпечка с доставкой",
+  });
 
-  // 2) Монтируем модалку один раз (если ещё не создана)
-  // В callbacks мы меняем store, а UI обновляем через store.subscribe ниже.
   if (!modalController) {
     modalController = createProductModal({
       onAdd: (id) => store.cart.actions.add(id),
@@ -44,99 +32,71 @@ export function renderMenuPage(ctx) {
     });
   }
 
-  const elCats = content.querySelector("#categories"); // Контейнер для категорий
-  const elGrid = content.querySelector("#productsGrid"); // Сетка товаров
-  const elCheckout = content.querySelector("#checkoutBtn"); // Кнопка оформления заказа
-  const elHeaderSum = content.querySelector("#headerSum");  // Подписка на store для обновления суммы в шапке
+  const elCats = document.getElementById("categories");
+  const elGrid = document.getElementById("productsGrid");
+  const elCheckout = document.getElementById("checkoutBtn");
 
-  // 3) Категории (кнопки)
+  // Категории
   elCats.innerHTML = CATEGORIES.map((c) => {
     const active = c.id === currentCategory ? "active" : "";
     return `<button class="cat-btn ${active}" data-cat="${c.id}">${c.title}</button>`;
   }).join("");
 
-  elCats.addEventListener("click", (e) => {
+  elCats.onclick = (e) => {
     const btn = e.target.closest("[data-cat]");
     if (!btn) return;
     currentCategory = btn.dataset.cat;
+    // перерисуем страницу (через ctx.render)
+    ctx.render("menu");
+  };
 
-    // перерисуем категории и товары
-    renderMenuPage(ctx);
-  });
-
-  // 4) Рендер товаров (учитываем корзину)
   function renderList() {
     const items = store.cart.selectors.items();
-
-    const list = PRODUCTS.filter((p) => currentCategory === "all" || p.category === currentCategory);
+    const list = PRODUCTS.filter(
+      (p) => currentCategory === "all" || p.category === currentCategory
+    );
 
     elGrid.innerHTML = list
-      .map((p) => {
-        const count = items[p.id] || 0;
-        // onOpen/onAdd/onRemove реализуем через data-action ниже (делегирование событий)
-        return ProductCard({ product: p, count, mode: "menu" });
-      })
+      .map((p) => ProductCard({ product: p, count: items[p.id] || 0, mode: "menu" }))
       .join("");
 
-    // Обновляем текст кнопки оформления (приятный UX)
     const total = calcCartTotal(items, PRODUCT_BY_ID);
-    //elHeaderSum.textContent = `${total} ฿`;
-
     elCheckout.textContent = total > 0 ? `Оформить заказ • ${total} ฿` : "Оформить заказ";
-  }
 
-  // 5) Делегирование кликов по карточкам (один обработчик на весь список)
-  elGrid.addEventListener("click", (e) => {
-  const card = e.target.closest(".product-card");
-  if (!card) return;
-
-  const id = Number(card.dataset.id);
-  const action = e.target.closest("[data-action]")?.dataset?.action;
-
-  if (action === "add") return store.cart.actions.add(id);
-  if (action === "remove") return store.cart.actions.remove(id);
-
-  // Открытие модалки — только если кликнули по card-click
-  if (e.target.closest('[data-action="open"]')) {
-    const product = PRODUCT_BY_ID[id];
-    const count = store.cart.selectors.getCount(id);
-    modalController.open(product, count);
-  }
-});
-
-  // 6) Подписка на store: при любом изменении корзины обновляем UI
-  // Важно: мы не создаём 100 подписок — но пока ок.
-  // Позже сделаем отписку при смене страниц, это следующий уровень.
-  const unsubscribe = store.subscribe(() => {
-    renderList();
-
-    // если модалка открыта — обновим счётчик
     const openedId = modalController.getCurrentId();
-    if (openedId) {
-      modalController.setCount(store.cart.selectors.getCount(openedId));
+    if (openedId) modalController.setCount(store.cart.selectors.getCount(openedId));
+  }
+
+  const onGridClick = (e) => {
+    const card = e.target.closest(".product-card");
+    if (!card) return;
+
+    const id = Number(card.dataset.id);
+    const action = e.target.closest("[data-action]")?.dataset?.action;
+
+    if (action === "add") return store.cart.actions.add(id);
+    if (action === "remove") return store.cart.actions.remove(id);
+
+    if (e.target.closest('[data-action="open"]')) {
+      modalController.open(PRODUCT_BY_ID[id], store.cart.selectors.getCount(id));
     }
-  });
+  };
 
-  // Чтобы не копить подписки при повторных рендерах этой страницы,
-  // можно сделать “одноразовую” подписку. Пока просто страхуемся:
-  // если вдруг страница рендерится повторно (категории), мы не хотим вечного накопления.
-  // Поэтому отписываемся, когда перерисовываем страницу:
-  // (мы вызываем renderMenuPage(ctx) заново в обработчике категорий — это уже новая страница)
-  // => здесь минимально: при новом renderMenuPage старый DOM исчезает, а подписка останется.
-  // Исправим это в следующем шаге, когда сделаем router “с жизненным циклом”.
-  // Сейчас — рабочий MVP.
+  elGrid.addEventListener("click", onGridClick);
 
-  // 7) Начальный рендер
-  renderList();
-
-  // 8) Кнопка “оформить заказ” пока заглушка
   elCheckout.onclick = () => {
     const total = calcCartTotal(store.cart.selectors.items(), PRODUCT_BY_ID);
     if (total <= 0) return tg.showAlert("Корзина пустая");
-    tg.showAlert("Следующий шаг — страница оформления заказа ✅");
+    tg.showAlert("Дальше сделаем оформление заказа ✅");
   };
 
-  // ВАЖНО: сейчас unsubscribe нигде не вызывается — это нормально на старте,
-  // но мы вернёмся к этому, когда будем делать полноценный router lifecycle.
-  void unsubscribe;
+  // Подписка на store
+  const unsub = store.subscribe(renderList);
+  renderList();
+
+  // cleanup: отписка + снятие обработчика
+  return () => {
+    try { unsub && unsub(); } catch (_) {}
+    try { elGrid.removeEventListener("click", onGridClick); } catch (_) {}
+  };
 }
