@@ -9,6 +9,7 @@
 import { renderHeader } from "../../../shared/ui/header.js";
 import { PRODUCT_BY_ID } from "../../../shared/data/products.js";
 import { navigate } from "../../../shared/router.js";
+import { toast } from "../../../shared/components/toast.js";
 
 function buildOrder(cartItems) {
   const items = [];
@@ -177,7 +178,7 @@ ${!canSend ? `
     // геолокация
     wrap.querySelector("#geoBtn").onclick = () => {
       if (!navigator.geolocation) {
-        alert("Геолокация не поддерживается этим устройством/браузером");
+        toast.error("Геолокация не поддерживается этим устройством/браузером");
         return;
       }
 
@@ -190,14 +191,14 @@ ${!canSend ? `
           };
           render();
         },
-        () => alert("Не удалось получить геолокацию. Проверь разрешения."),
+        () => toast.error("Не удалось получить геолокацию. Проверь разрешения."),
         { enableHighAccuracy: true, timeout: 10000 }
       );
     };
 
     // ✅ отправка заказа (и ТОЛЬКО тут чистим корзину)
     wrap.querySelector("#sendOrderBtn").onclick = () => {
-      if (!canSend) return;
+      if (!canSend) return; 
 
         const tgUser = getTgUser(tg);
 
@@ -212,6 +213,7 @@ ${!canSend ? `
 
       if (tg?.sendData) tg.sendData(JSON.stringify(payload));
       else console.log("ORDER PAYLOAD:", payload);
+       toast.success("Заказ отправлен ✅");
 
       // ✅ очищаем корзину и уходим на success
       store.cart.actions.clear();

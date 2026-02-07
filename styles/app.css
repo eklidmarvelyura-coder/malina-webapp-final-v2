@@ -10,9 +10,9 @@
 /* Sidebar */
 .sidebar{
   flex: 0 0 var(--sidebarW);   /* НЕ даём сайдбару сжиматься/расширяться */
-  width: var(--sidebarW);
+  width: var(--sidebarW); 
 
-  padding: 14px;
+  padding: 14px; 
   display:flex;
   flex-direction:column;
   gap: 12px;
@@ -21,7 +21,7 @@
   top: 10px;
   align-self: flex-start;
 
-  height: calc(100vh - 20px);
+  height: calc(100vh - 20px); 
   overflow: auto;
 
   scrollbar-gutter: stable; /* чтобы ширина не менялась из-за скроллбара */
@@ -116,7 +116,19 @@
 
 
 /* Mobile */
-@media (max-width: 480px){
+@media (max-width: 480px){ 
   :root{ --sidebarW: 132px; } 
   .sidebar{ padding: 10px; top: 8px; height: calc(100vh - 16px); } 
+}
+
+/* =========================
+   PAGE TRANSITIONS
+   ========================= */
+#content.page-enter{
+  animation: pageEnter 160ms ease;
+}
+
+@keyframes pageEnter{
+  from{ opacity: 0; transform: translateY(6px); }
+  to{ opacity: 1; transform: translateY(0); }
 }

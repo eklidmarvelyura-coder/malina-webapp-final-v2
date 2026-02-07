@@ -20,6 +20,12 @@ export function setCleanup(fn) {
  */
 export function navigate(route, ctx) {
   // cleanup...
+  if (ctx?.content) {
+  ctx.content.classList.remove("page-enter");
+  // reflow, чтобы анимация всегда запускалась
+  void ctx.content.offsetWidth;
+  ctx.content.classList.add("page-enter");
+}
   if (typeof currentCleanup === "function") {
     try { currentCleanup(); } catch (_) {}
   }

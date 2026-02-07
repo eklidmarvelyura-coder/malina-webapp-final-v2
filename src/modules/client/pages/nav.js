@@ -1,5 +1,7 @@
 // src/modules/client/pages/nav.js
 import { navigate } from "../../../shared/router.js";
+import { openCafeMapModal } from "../../../shared/components/mapModal.js";
+
 
 /**
  * Sidebar navigation (под createStore + cartStore из твоей архитектуры):
