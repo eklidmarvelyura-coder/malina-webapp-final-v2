@@ -147,3 +147,42 @@
     margin-left: var(--sidebarW);
   }
 }
+/* ======================================================
+   MOBILE: FIXED SIDEBAR (never scrolls / never shifts)
+   ====================================================== */
+@media (max-width: 720px){
+
+  /* убиваем горизонтальный скролл и “ползание” */
+  html, body{
+    overflow-x: hidden;
+  }
+
+  .app{
+    width: 100%;
+  }
+
+  /* sidebar всегда на месте */
+  .sidebar{
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: var(--sidebarW);
+    flex: 0 0 var(--sidebarW);
+
+    height: 100dvh;
+    overflow: hidden;
+
+    z-index: 2000;
+
+    /* если вдруг есть transform на родителях — fixed иногда глючит */
+    transform: translateZ(0);
+  }
+
+  /* контент не залезает под sidebar */
+  .content{
+    margin-left: var(--sidebarW);
+    min-width: 0;
+    width: calc(100% - var(--sidebarW));
+  }
+}

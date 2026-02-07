@@ -2,9 +2,10 @@
 // Checkout (без форм имени/телефона):
 // - user берём из Telegram initDataUnsafe (если открыто в TG)
 // - геолокация по разрешению браузера
-// - красивый список заказа карточками
+// - доставка требует гео: кнопка отправки активна только при geo
+// - самовывоз запрещён, если в заказе есть category === "coffee"
 // - отправка payload в tg.sendData()
-// - после отправки: clear корзины + navigate("success")
+// - после отправки: clear корзины + success page
 
 import { renderHeader } from "../../../shared/ui/header.js";
 import { PRODUCT_BY_ID } from "../../../shared/data/products.js";
@@ -19,7 +20,7 @@ function buildOrder(cartItems) {
     const qty = Number(cartItems[id] || 0);
     if (qty <= 0) continue;
 
-    const p = PRODUCT_BY_ID[id];
+    const p = PRODUCT_BY_ID[String(id)];
     if (!p) continue;
 
     const sum = Number(p.price || 0) * qty;
@@ -32,6 +33,7 @@ function buildOrder(cartItems) {
       qty,
       sum,
       image: p.image,
+      category: p.category,
     });
   }
 
@@ -69,7 +71,7 @@ export function renderCheckoutPage(ctx) {
 
   const wrap = content.querySelector("#checkoutWrap");
 
-  // локальное состояние страницы
+  // Локальное состояние страницы checkout
   const pageState = {
     mode: "delivery", // delivery | pickup
     geo: null,        // {lat, lon, accuracy} | null
@@ -78,7 +80,6 @@ export function renderCheckoutPage(ctx) {
   function render() {
     const cartItems = store.cart.selectors.items();
     const order = buildOrder(cartItems);
-    const canSend = pageState.mode === "pickup" || !!pageState.geo;
 
     // если корзина пустая — нечего оформлять
     if (order.items.length === 0) {
@@ -94,13 +95,41 @@ export function renderCheckoutPage(ctx) {
       return;
     }
 
+    // ✅ Ограничение: самовывоз нельзя, если в заказе есть кофе
+    const hasCoffee = order.items.some((it) => it.category === "coffee");
+
+    // если вдруг пользователь стоял на самовывозе и добавил кофе — возвращаем на доставку
+    if (hasCoffee && pageState.mode === "pickup") {
+      pageState.mode = "delivery";
+    }
+
+    // ✅ Правило UX: доставка требует геолокацию
+    const canSend = pageState.mode === "pickup" || !!pageState.geo;
+
     wrap.innerHTML = `
       <div class="checkout-grid">
         <div class="checkout-panel glass-lite">
           <div class="segmented">
-            <button class="seg-btn ${pageState.mode === "delivery" ? "active" : ""}" data-mode="delivery">Доставка</button>
-            <button class="seg-btn ${pageState.mode === "pickup" ? "active" : ""}" data-mode="pickup">Самовывоз</button>
+            <button class="seg-btn ${pageState.mode === "delivery" ? "active" : ""}" data-mode="delivery">
+              Доставка
+            </button>
+
+            <button
+              class="seg-btn ${pageState.mode === "pickup" ? "active" : ""} ${hasCoffee ? "disabled" : ""}"
+              data-mode="pickup"
+              ${hasCoffee ? "disabled" : ""}
+              title="${hasCoffee ? "Самовывоз недоступен при наличии кофе в заказе" : ""}"
+            >
+              Самовывоз
+            </button>
           </div>
+
+          ${hasCoffee ? `
+            <div class="field-err">
+              Самовывоз недоступен, если в заказе есть кофе ☕
+              (Кофе нужно пить сразу, а везти его не всегда удобно)
+            </div>
+          ` : ""}
 
           <div class="checkout-note">
             <div class="note-title">Данные клиента</div>
@@ -117,6 +146,7 @@ export function renderCheckoutPage(ctx) {
                 ? `Определено: ${pageState.geo.lat.toFixed(5)}, ${pageState.geo.lon.toFixed(5)} (±${Math.round(pageState.geo.accuracy)}м)`
                 : `Не определена. Нажми кнопку ниже — браузер спросит разрешение.`}
             </div>
+
             <button class="primary" id="geoBtn">
               ${pageState.geo ? "Обновить геолокацию" : "Определить геолокацию"}
             </button>
@@ -151,26 +181,31 @@ export function renderCheckoutPage(ctx) {
           </div>
 
           <button class="primary" id="sendOrderBtn" ${canSend ? "" : "disabled"}>
-  Отправить заказ
-</button>
+            Отправить заказ
+          </button>
 
-${!canSend ? `
-  <div class="field-err" style="margin-top:10px;">
-    Для доставки нужно разрешить геолокацию 📍
-  </div>
-` : ""}
+          ${!canSend ? `
+            <div class="field-err" style="margin-top:10px;">
+              Для доставки нужно разрешить геолокацию 📍
+            </div>
+          ` : ""}
 
           <div class="muted" style="font-size:12px; margin-top:10px;">
-            Следующий шаг: бот примет заказ и отправит в канал “Заказы”.
+            Следующий шаг: бот примет заказ и отправит его в канал “Заказы”.
           </div>
         </div>
       </div>
     `;
 
     // переключение delivery/pickup
-    wrap.querySelectorAll(".seg-btn").forEach(btn => {
+    wrap.querySelectorAll(".seg-btn").forEach((btn) => {
       btn.onclick = () => {
-        pageState.mode = btn.dataset.mode;
+        const mode = btn.dataset.mode;
+
+        // ✅ блокируем самовывоз, если в корзине есть кофе
+        if (mode === "pickup" && hasCoffee) return;
+
+        pageState.mode = mode;
         render();
       };
     });
@@ -189,6 +224,7 @@ ${!canSend ? `
             lon: pos.coords.longitude,
             accuracy: pos.coords.accuracy,
           };
+          toast.success("Геолокация получена ✅");
           render();
         },
         () => toast.error("Не удалось получить геолокацию. Проверь разрешения."),
@@ -196,28 +232,30 @@ ${!canSend ? `
       );
     };
 
-    // ✅ отправка заказа (и ТОЛЬКО тут чистим корзину)
+    // отправка заказа
     wrap.querySelector("#sendOrderBtn").onclick = () => {
-      if (!canSend) return; 
+      // доставка требует geo
+      if (!canSend) return;
 
-        const tgUser = getTgUser(tg);
+      const tgUser = getTgUser(tg);
 
       const payload = {
         type: "order",
         createdAt: Date.now(),
         mode: pageState.mode,
         user: tgUser,
-        geo: pageState.geo, // может быть null
+        geo: pageState.geo, // может быть null (если pickup)
         order,              // items + total
       };
 
       if (tg?.sendData) tg.sendData(JSON.stringify(payload));
       else console.log("ORDER PAYLOAD:", payload);
-       toast.success("Заказ отправлен ✅");
 
-      // ✅ очищаем корзину и уходим на success
+      toast.success("Заказ отправлен ✅");
+
+      // очищаем корзину и уходим на success
       store.cart.actions.clear();
-      navigate("success", ctx); // после отправки заказа показываем страницу успеха 
+      navigate("success", ctx);
     };
   }
 

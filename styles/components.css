@@ -456,3 +456,9 @@
 @supports (height: 100dvh){
   #mapModal{ height: 100dvh !important; }
 }
+
+.seg-btn:disabled,
+.seg-btn.disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+}
