@@ -240,26 +240,34 @@ export function renderCheckoutPage(ctx) {
       const tgUser = getTgUser(tg);
 
       const payload = {
-        type: "order",
-        createdAt: Date.now(),
-        mode: pageState.mode,
-        user: tgUser,
-        geo: pageState.geo, // может быть null (если pickup)
-        order,              // items + total
-      };
+  type: "order",
+  createdAt: Date.now(),
+  mode: pageState.mode,
+  user: tgUser,
+  geo: pageState.geo, // может быть null (если pickup)
+  order,              // items + total
+};
 
-      if (tg?.sendData) tg.sendData(JSON.stringify(payload));
-      else console.log("ORDER PAYLOAD:", payload);
-      // ✅ сохраняем заказ локально в историю (MVP)
-        const orderId = "MAL-" + payload.createdAt;
-        store.orders.actions.add({
-        id: orderId,
-        createdAt: payload.createdAt,
-         status: "Отправлен",
-        mode: payload.mode,
-        total: payload.order.total,
-        items: payload.order.items.map(x => ({
-        id: x.id, name: x.name, qty: x.qty, sum: x.sum
+// ✅ один id и для payload, и для истории
+const orderId = "MAL-" + payload.createdAt;
+payload.orderId = orderId;
+
+// 1) отправляем в Telegram (боту/серверу)
+if (tg?.sendData) tg.sendData(JSON.stringify(payload));
+else console.log("ORDER PAYLOAD:", payload);
+
+// 2) сохраняем локально в историю
+store.orders.actions.add({
+  id: orderId,
+  createdAt: payload.createdAt,
+  status: "Отправлен",
+  mode: payload.mode,
+  total: payload.order.total,
+  items: payload.order.items.map((x) => ({
+    id: x.id,
+    name: x.name,
+    qty: x.qty,
+    sum: x.sum,
   })),
   user: payload.user,
   geo: payload.geo,
