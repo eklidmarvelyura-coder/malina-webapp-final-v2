@@ -1,0 +1,35 @@
+/* ======================================================
+   SUCCESS PAGE
+   ====================================================== */
+
+.success-wrap{
+  margin: 0 18px;
+  display:flex;
+  justify-content:center;
+}
+
+.success-card{
+  width: min(520px, 100%);
+  padding: 18px;
+  border-radius: var(--r22);
+  text-align:center;
+}
+
+.success-ico{
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.success-title{
+  font-weight: 900;
+  font-size: 22px;
+}
+
+.success-sub{
+  margin: 10px 0 16px;
+  line-height: 1.4;
+}
+
+@media (max-width: 480px){
+  .success-wrap{ margin: 0 12px; }
+}

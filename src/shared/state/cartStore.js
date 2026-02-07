@@ -33,6 +33,8 @@ export function cartStore() {
 
       clear: () => {
         items = {};
+        state.items = {};
+        notify();
       },
     },
   };

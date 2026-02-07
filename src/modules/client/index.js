@@ -13,6 +13,8 @@ import { renderCartPage } from "./pages/cart.js";
 import { renderFeedbackPage } from "./pages/feedback.js";
 import { renderCheckoutPage } from "./pages/checkout.js";
 import { renderAboutPage } from "./pages/about.js";
+import { renderSuccessPage } from "./pages/success.js";
+
 
 import { navigate, setCleanup } from "../../shared/router.js";
 
@@ -37,11 +39,12 @@ export function mountClientApp(store, tg) {
       let cleanup = null;
 
       try {
-        if (route === "menu") cleanup = renderMenuPage(ctx);
-        else if (route === "cart") cleanup = renderCartPage(ctx);
-        else if (route === "feedback") cleanup = renderFeedbackPage(ctx);
-        else if (route === "checkout") cleanup = renderCheckoutPage(ctx);
-        else if (route === "about") cleanup = renderAboutPage(ctx);
+        if (route === "menu") cleanup = renderMenuPage(ctx); // главная страница с меню
+        else if (route === "cart") cleanup = renderCartPage(ctx); // новая страница корзины, вместо модального окна
+        else if (route === "feedback") cleanup = renderFeedbackPage(ctx); // временно, пока "Связь" в разработке
+        else if (route === "checkout") cleanup = renderCheckoutPage(ctx); //  новая страница оформления заказа
+        else if (route === "about") cleanup = renderAboutPage(ctx); // временно, пока "Мы на карте" в разработке
+        else if (route === "success") cleanup = renderSuccessPage(ctx); // страница успеха после оформления заказа
         else cleanup = renderMenuPage(ctx);
       } catch (err) {
         console.error("Page render failed:", route, err);

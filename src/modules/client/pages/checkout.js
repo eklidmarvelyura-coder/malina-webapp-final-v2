@@ -213,8 +213,10 @@ export function renderCheckoutPage(ctx) {
         alert("Открыто не в Telegram — payload в консоли ✅");
       }
 
-      // потом сделаем: страницу "Спасибо" + очистку корзины
-      navigate("menu", ctx);
+      // отправили payload...
+       store.cart.actions.clear();     // ✅ очищаем корзину
+       navigate("success", ctx);       // ✅ красивый экран "принято"
+
     };
   }
 
