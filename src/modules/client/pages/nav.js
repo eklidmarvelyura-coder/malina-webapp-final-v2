@@ -7,8 +7,10 @@ export function renderClientNav(sidebar, ctx) {
 
   sidebar.innerHTML = `
     <div class="nav-top">
-      <div class="brand">🍓Карта📌</div>
-      
+      <button class="nav-item" data-go="map">
+        <div class="nav-ico">🍓</div>
+        <div class="nav-txt">Карта 📌</div>
+      </button>
 
       <button class="nav-item" data-go="menu">
         <div class="nav-ico">🍽</div>
@@ -36,17 +38,17 @@ export function renderClientNav(sidebar, ctx) {
           <span class="cart-label">Сумма:</span>
           <span class="cart-val" id="cartSum">0 ฿</span>
         </div>
-        <div class="cart-open-link" id="openCartBtn">Открыть →</div>
-
-      </div>
+      
     </div>
   `;
 
   sidebar.querySelectorAll("[data-go]").forEach((btn) => {
-    btn.addEventListener("click", () => navigate(btn.dataset.go, ctx));
+    btn.addEventListener("click", () => {
+      if (btn.dataset.go === "map") return navigate("about", ctx); // пока так
+      navigate(btn.dataset.go, ctx);
+    });
   });
 
-  sidebar.querySelector("#openCartBtn").addEventListener("click", () => navigate("cart", ctx));
   sidebar.querySelector("#cartWidget").addEventListener("click", () => navigate("cart", ctx));
 
   const elCount = sidebar.querySelector("#cartItemsCount");

@@ -1,79 +1,86 @@
-.app-shell{ display:flex; height:100vh; }
+.app{
+  display:flex;
+  min-height:100vh;
+}
+
 .sidebar{
-  width:86px;
+  width: 150px;
+  padding: 14px;
   display:flex;
   flex-direction:column;
-  justify-content:space-between;
-  padding:10px;
-  background: var(--glass);
-  backdrop-filter: blur(16px);
-  border-right: 1px solid var(--glassBorder);
+  gap: 12px;
 }
-.content{ flex:1; padding:16px; overflow:auto; }
-/* Sidebar items with labels */
-.nav-top{ display:flex; flex-direction:column; gap:10px; }
-.brand{
-  width:100%;
-  height:44px;
+
+.content{
+  flex:1;
+  padding: 16px 16px 22px;
   display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:18px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.14);
+  justify-content:center; /* центрируем страницы */
+}
+
+/* общая "страница" */
+.page{
+  width: 100%;
+  max-width: var(--maxw);
+}
+
+/* универсальное стекло */
+.glass{
+  background: var(--glass);
+  border: 1px solid var(--glassBorder);
+  border-radius: var(--r22);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.page-header{
+  padding: 18px 18px 10px;
+}
+.page-header h1{
+  margin:0;
+  font-size: 34px;
+  letter-spacing: -0.5px;
+}
+.muted{ color: var(--muted); margin: 6px 0 0; }
+
+/* sidebar items */
+.nav-top{ display:flex; flex-direction:column; gap: 12px; }
+.brand{
+  padding: 12px;
+  text-align:center;
+  border-radius: var(--r22);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  font-weight: 900;
 }
 
 .nav-item{
   border:0;
   width:100%;
-  background: rgba(255,255,255,0.10);
+  padding: 12px 10px;
+  border-radius: var(--r22);
+  cursor:pointer;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
   color: var(--text);
-  border-radius:18px;
-  padding:10px 6px;
+}
+.nav-item:hover{ background: rgba(255,255,255,.09); }
+.nav-ico{ font-size: 20px; }
+.nav-txt{ margin-top: 6px; font-size: 12px; opacity: .9; }
+
+/* нижний виджет корзины */
+.nav-bottom{ margin-top:auto; }
+.cart-widget{
+  padding: 12px;
+  border-radius: var(--r22);
   cursor:pointer;
 }
-
-.nav-ico{ font-size: 20px; line-height: 1; }
-.nav-txt{ font-size: 11px; opacity: .9; margin-top: 6px; }
-
-.nav-bottom{ margin-top:auto; }
-
-.cart-widget{
-  padding:12px;
-  border-radius:20px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
 .cart-row{
   display:flex;
   justify-content:space-between;
   font-size: 12px;
+  margin: 6px 0;
 }
-
-.cart-label{ opacity: .85; }
-.cart-val{ font-weight: 800; }
-
-.cart-open-btn{
-  padding: 10px 12px;
-  border-radius: 16px;
-}
-/* ==== Desktop polish: чтобы на ПК не было "пустыни" ==== */
-
-/* Сайдбар чуть шире (ты просил) */
-.sidebar{
-  width: 140px;              /* было ~86px */
-}
-
-/* Контент: центрируем страницу и ограничиваем максимальную ширину */
-.content{
-  display: flex;
-  justify-content: center;   /* центрируем "страницу" внутри контента */
-}
-
-/* Любая страница (page) не должна быть шире, чем комфортно читать */
-.page{
-  width: 100%;
-  max-width: 1150px;         /* ключевой фикс для ПК */
-}
+.cart-label{ color: var(--muted); }
+.cart-val{ font-weight: 900; }
