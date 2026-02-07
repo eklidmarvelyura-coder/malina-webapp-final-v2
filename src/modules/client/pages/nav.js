@@ -2,17 +2,25 @@
 import { navigate } from "../../../shared/router.js";
 
 /**
- * Sidebar navigation.
- * - Содержит 3 кнопки: Menu / Cart / Feedback
- * - Badge на "Корзина" появляется только если товаров > 0
- * - Подсветка активной страницы
+ * Универсальный sidebar:
+ * - "Мы на карте"
+ * - Меню / Корзина (badge) / Связь
+ * - Active подсветка
+ * - Badge не ломает приложение, даже если store устроен нестандартно
  */
 export function renderClientNav(sidebar, ctx) {
-  const { store } = ctx;
+  const store = ctx.store; // может быть любым
 
   sidebar.innerHTML = `
     <div class="nav-top">
-      <div class="brand">🍓</div>
+    <div class="brand">🍓</div> 
+    
+      <button class="nav-item" data-route="map" id="navMapBtn">
+        <div class="nav-ico">📍</div>
+        <div class="nav-txt">Мы на карте</div>
+      </button>
+
+      
 
       <button class="nav-item" data-route="menu">
         <div class="nav-ico">🍽</div>
@@ -39,11 +47,32 @@ export function renderClientNav(sidebar, ctx) {
     buttons.forEach((b) => b.classList.toggle("active", b.dataset.route === route));
   }
 
-  // Универсально считаем кол-во товаров.
-  // Поддержим две структуры:
-  // - state.cart.items = { [id]: qty }
-  // - state.cart = { [id]: qty }
-  function calcCountFromState(cartState) {
+  // ---- Универсально получаем state из стора ----
+  function getStateSafe() {
+    try {
+      if (!store) return null;
+      if (typeof store.getState === "function") return store.getState();
+      if (typeof store.get === "function") return store.get();
+      if (store.state) return store.state;
+      return null;
+    } catch (e) {
+      console.warn("getStateSafe error:", e);
+      return null;
+    }
+  }
+
+  // ---- Считаем товары в корзине ----
+  function calcCountFromState(state) {
+    // поддержка вариантов:
+    // state.cart.items
+    // state.cart
+    // state.cartStore/items
+    const cartState =
+      state?.cart ??
+      state?.cartStore ??
+      state?.stores?.cart ??
+      null;
+
     const items = cartState?.items ?? cartState ?? {};
     let count = 0;
     for (const k in items) count += Number(items[k] || 0);
@@ -51,10 +80,9 @@ export function renderClientNav(sidebar, ctx) {
   }
 
   function updateBadge() {
-    const cartState = store.getState().cart;
-    const count = calcCountFromState(cartState);
+    const state = getStateSafe();
+    const count = state ? calcCountFromState(state) : 0;
 
-    // Если 0 — badge скрываем полностью (чтобы кнопка была “красивая”)
     if (count <= 0) {
       badge.classList.add("hidden");
       badge.textContent = "0";
@@ -65,25 +93,35 @@ export function renderClientNav(sidebar, ctx) {
     badge.classList.remove("hidden");
   }
 
-  // Навигация по клику
+  // ---- Клик по кнопкам ----
   buttons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const route = btn.dataset.route;
+
+      // MAP — пока без отдельной страницы:
+      // делаем popup/alert, а позже сделаем полноценный modal с картой.
+      if (route === "map") {
+        // Telegram WebApp: showPopup может быть не поддержан в старых версиях.
+        // Поэтому используем простой alert.
+        alert("Скоро здесь будет карта кафе 🙂");
+        return;
+      }
+
       setActive(route);
       navigate(route, ctx);
     });
   });
 
-  // Стартовое состояние
+  // старт
   setActive(ctx.route || "menu");
   updateBadge();
 
-  // Подписка на store — badge обновляется при любом изменении корзины
-  const unsub = store.subscribe(() => {
-    updateBadge();
-  });
+  // ---- Подписка на store (если есть) ----
+  let unsub = null;
+  if (store && typeof store.subscribe === "function") {
+    unsub = store.subscribe(() => updateBadge());
+  }
 
-  // cleanup (на будущее, если sidebar будут перемонтировать)
   return () => {
     try { unsub?.(); } catch (_) {}
   };
