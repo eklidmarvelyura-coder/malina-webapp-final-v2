@@ -1,10 +1,10 @@
 // src/modules/client/pages/checkout.js
-// Checkout v2 (без форм имени/телефона):
-// - берём пользователя из Telegram (если доступно)
+// Checkout (без форм имени/телефона):
+// - user берём из Telegram initDataUnsafe (если открыто в TG)
+// - геолокация по разрешению браузера
 // - красивый список заказа карточками
-// - выбор: доставка / самовывоз
-// - кнопка "Определить геолокацию" (если пользователь разрешит)
-// - tg.sendData(payload) с order + user + geo
+// - отправка payload в tg.sendData()
+// - после отправки: clear корзины + navigate("success")
 
 import { renderHeader } from "../../../shared/ui/header.js";
 import { PRODUCT_BY_ID } from "../../../shared/data/products.js";
@@ -34,13 +34,11 @@ function buildOrder(cartItems) {
     });
   }
 
-  // красиво: сначала по категории/имени можно позже
   items.sort((a, b) => a.name.localeCompare(b.name, "ru"));
   return { items, total };
 }
 
 function getTgUser(tg) {
-  // Telegram WebApp даёт user в initDataUnsafe (если открыто из бота)
   try {
     const u = tg?.initDataUnsafe?.user;
     if (!u) return null;
@@ -63,7 +61,6 @@ export function renderCheckoutPage(ctx) {
     <div class="menu-sticky glass">
       <div id="checkoutHeader"></div>
     </div>
-
     <div class="checkout-wrap" id="checkoutWrap"></div>
   `;
 
@@ -71,23 +68,23 @@ export function renderCheckoutPage(ctx) {
 
   const wrap = content.querySelector("#checkoutWrap");
 
-  // локальное состояние
-  const state = {
+  // локальное состояние страницы
+  const pageState = {
     mode: "delivery", // delivery | pickup
-    geo: null,        // {lat, lon, accuracy}
+    geo: null,        // {lat, lon, accuracy} | null
   };
 
   function render() {
     const cartItems = store.cart.selectors.items();
     const order = buildOrder(cartItems);
 
-    // пусто
+    // если корзина пустая — нечего оформлять
     if (order.items.length === 0) {
       wrap.innerHTML = `
         <div class="empty glass">
           <div class="empty-ico">🧺</div>
           <div class="empty-title">Нечего оформлять</div>
-          <div class="empty-sub">Добавь товары в меню</div>
+          <div class="empty-sub">Добавь товары в корзину</div>
           <button class="primary empty-btn" id="goMenuBtn">Перейти в меню</button>
         </div>
       `;
@@ -97,40 +94,37 @@ export function renderCheckoutPage(ctx) {
 
     wrap.innerHTML = `
       <div class="checkout-grid">
-        <!-- Левый блок: доставка/самовывоз + гео -->
         <div class="checkout-panel glass-lite">
           <div class="segmented">
-            <button class="seg-btn ${state.mode === "delivery" ? "active" : ""}" data-mode="delivery">Доставка</button>
-            <button class="seg-btn ${state.mode === "pickup" ? "active" : ""}" data-mode="pickup">Самовывоз</button>
+            <button class="seg-btn ${pageState.mode === "delivery" ? "active" : ""}" data-mode="delivery">Доставка</button>
+            <button class="seg-btn ${pageState.mode === "pickup" ? "active" : ""}" data-mode="pickup">Самовывоз</button>
           </div>
 
           <div class="checkout-note">
             <div class="note-title">Данные клиента</div>
             <div class="muted">
-              Мы берём профиль из Telegram. Телефон Telegram не отдаёт автоматически —
-              позже добавим запрос контакта через бота (один раз).
+              Профиль берём из Telegram. Телефон Telegram автоматически не отдаёт —
+              позже добавим запрос контакта через бота.
             </div>
           </div>
 
           <div class="geo-box">
             <div class="geo-title">Локация</div>
             <div class="muted geo-sub">
-              ${state.geo
-                ? `Определено: ${state.geo.lat.toFixed(5)}, ${state.geo.lon.toFixed(5)} (±${Math.round(state.geo.accuracy)}м)`
+              ${pageState.geo
+                ? `Определено: ${pageState.geo.lat.toFixed(5)}, ${pageState.geo.lon.toFixed(5)} (±${Math.round(pageState.geo.accuracy)}м)`
                 : `Не определена. Нажми кнопку ниже — браузер спросит разрешение.`}
             </div>
-
             <button class="primary" id="geoBtn">
-              ${state.geo ? "Обновить геолокацию" : "Определить геолокацию"}
+              ${pageState.geo ? "Обновить геолокацию" : "Определить геолокацию"}
             </button>
           </div>
         </div>
 
-        <!-- Правый блок: красивый заказ -->
         <div class="checkout-summary glass-lite">
           <div class="sum-title">Ваш заказ</div>
 
-          <div class="sum-cards" id="sumCards">
+          <div class="sum-cards">
             ${order.items.map(it => `
               <div class="sum-card">
                 <img class="sum-img" src="${it.image}" alt="${it.name}">
@@ -154,9 +148,7 @@ export function renderCheckoutPage(ctx) {
             <div class="sum-total-val">${order.total} ฿</div>
           </div>
 
-          <button class="primary" id="sendOrderBtn">
-            Отправить заказ
-          </button>
+          <button class="primary" id="sendOrderBtn">Отправить заказ</button>
 
           <div class="muted" style="font-size:12px; margin-top:10px;">
             Следующий шаг: бот примет заказ и отправит в канал “Заказы”.
@@ -165,10 +157,10 @@ export function renderCheckoutPage(ctx) {
       </div>
     `;
 
-    // переключатель режимов
+    // переключение delivery/pickup
     wrap.querySelectorAll(".seg-btn").forEach(btn => {
       btn.onclick = () => {
-        state.mode = btn.dataset.mode;
+        pageState.mode = btn.dataset.mode;
         render();
       };
     });
@@ -179,9 +171,10 @@ export function renderCheckoutPage(ctx) {
         alert("Геолокация не поддерживается этим устройством/браузером");
         return;
       }
+
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          state.geo = {
+          pageState.geo = {
             lat: pos.coords.latitude,
             lon: pos.coords.longitude,
             accuracy: pos.coords.accuracy,
@@ -193,36 +186,32 @@ export function renderCheckoutPage(ctx) {
       );
     };
 
-    // отправка
+    // ✅ отправка заказа (и ТОЛЬКО тут чистим корзину)
     wrap.querySelector("#sendOrderBtn").onclick = () => {
       const tgUser = getTgUser(tg);
+
       const payload = {
         type: "order",
         createdAt: Date.now(),
-        mode: state.mode,
+        mode: pageState.mode,
         user: tgUser,
-        geo: state.geo,        // может быть null
-        order: order,          // items + total
+        geo: pageState.geo, // может быть null
+        order,              // items + total
       };
 
-      if (tg?.sendData) {
-    tg.sendData(JSON.stringify(payload));
-  } else {
-    console.log("ORDER PAYLOAD:", payload);
-  }
+      if (tg?.sendData) tg.sendData(JSON.stringify(payload));
+      else console.log("ORDER PAYLOAD:", payload);
 
-  // ✅ ВОТ ЭТИ 2 СТРОКИ — КЛЮЧ
-  ctx.store.cart.actions.clear();
-  navigate("success", ctx);
-};
-console.log("COUNT BEFORE CLEAR:", ctx.store.cart.selectors.countAll());
-ctx.store.cart.actions.clear();
-console.log("COUNT AFTER CLEAR:", ctx.store.cart.selectors.countAll());
-
+      // ✅ очищаем корзину и уходим на success
+      store.cart.actions.clear();
+      navigate("success", ctx);
+    };
   }
 
   render();
   const unsub = store.subscribe(() => render());
 
-  return () => { try { unsub?.(); } catch (_) {} };
+  return () => {
+    try { unsub?.(); } catch (_) {}
+  };
 }

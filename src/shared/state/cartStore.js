@@ -1,41 +1,72 @@
 // src/shared/state/cartStore.js
-// Store хранит состояние корзины и даёт actions для изменения.
-// ВАЖНО: store НЕ знает о ценах и товарах — только количества по id.
-// Так архитектура чище: данные меню отдельно, состояние корзины отдельно.
+// Хранилище корзины. Держим ТОЛЬКО количества по id.
+// Цены/названия/картинки берём из PRODUCT_BY_ID при рендере.
+// Важно: notify() приходит из createStore() и триггерит перерисовку UI.
 
 export function cartStore() {
-  // items: { [productId]: count }
-  let items = {};
+  // ВНУТРЕННЕЕ состояние модуля (никакого `state` глобально нет!)
+  const items = {}; // { [id]: qty }
+
+  let notify = () => {};
+
+  // ---- селекторы (чтение) ----
+  const selectors = {
+    // Вернём КОПИЮ, чтобы никто снаружи не мутировал напрямую
+    items() {
+      return { ...items };
+    },
+
+    // Сколько всего единиц товара в корзине (для badge)
+    countAll() {
+      let c = 0;
+      for (const id in items) c += Number(items[id] || 0);
+      return c;
+    },
+  };
+
+  // ---- actions (изменения) ----
+  const actions = {
+    add(id) {
+      const key = String(id);
+      items[key] = (Number(items[key]) || 0) + 1;
+      notify();
+    },
+
+    remove(id) {
+      const key = String(id);
+      if (!items[key]) return;
+
+      items[key] = Number(items[key]) - 1;
+      if (items[key] <= 0) delete items[key];
+
+      notify();
+    },
+
+    set(id, qty) {
+      const key = String(id);
+      const n = Number(qty || 0);
+
+      if (n <= 0) delete items[key];
+      else items[key] = n;
+
+      notify();
+    },
+
+    // ✅ НОВОЕ: очистка корзины (без state, просто чистим items)
+    clear() {
+      for (const id in items) delete items[id];
+      notify();
+    },
+  };
+
+  // createStore() подставит сюда свою функцию уведомления
+  function _setNotify(fn) {
+    notify = typeof fn === "function" ? fn : () => {};
+  }
 
   return {
-    selectors: {
-      items: () => items,
-
-      // Кол-во позиций (не уникальных товаров, а суммарно всех)
-      countAll: () => Object.values(items).reduce((a, b) => a + b, 0),
-
-      // Кол-во уникальных товаров
-      countUnique: () => Object.keys(items).length,
-
-      getCount: (id) => items[id] || 0,
-    },
-
-    actions: {
-      add: (id) => {
-        items[id] = (items[id] || 0) + 1;
-      },
-
-      remove: (id) => {
-        if (!items[id]) return;
-        items[id] -= 1;
-        if (items[id] <= 0) delete items[id];
-      },
-
-      clear: () => {
-        items = {};
-        state.items = {};
-        notify();
-      },
-    },
+    selectors,
+    actions,
+    _setNotify,
   };
 }
