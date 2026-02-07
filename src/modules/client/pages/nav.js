@@ -82,6 +82,9 @@ export function renderClientNav(sidebar, ctx) {
 
   // старт
   setActive(ctx.route || "menu");
+  // ✅ nav слушает изменения маршрута (переходы не только из sidebar)
+ctx.onRouteChange = (route) => {setActive(route);}; 
+
   updateBadge();
 
   // store.subscribe существует :contentReference[oaicite:3]{index=3}

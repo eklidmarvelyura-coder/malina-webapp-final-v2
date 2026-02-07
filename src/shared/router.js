@@ -19,11 +19,18 @@ export function setCleanup(fn) {
  * 2) вызываем ctx.render(route)
  */
 export function navigate(route, ctx) {
+  // cleanup...
   if (typeof currentCleanup === "function") {
-    try { currentCleanup(); } catch (e) { console.warn("cleanup error:", e); }
+    try { currentCleanup(); } catch (_) {}
   }
   currentCleanup = null;
 
   ctx.route = route;
+
+  // ✅ ВАЖНО: сообщаем UI (sidebar), что маршрут сменился
+  if (typeof ctx.onRouteChange === "function") {
+    try { ctx.onRouteChange(route); } catch (_) {}
+  }
+
   ctx.render(route);
 }
