@@ -1,11 +1,25 @@
+/* ===== Anti horizontal scroll (mobile) ===== */
+html, body{
+  width: 100%;
+  overflow-x: hidden;
+}
+
+*{
+  box-sizing: border-box;
+}
+
+
+
+
 /* ======================================================
    APP LAYOUT — sidebar sticky on mobile + polished
    ====================================================== */
 
 .app{
-  display:flex;
-  min-height:100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
+
 
 /* Sidebar */
 .sidebar{
@@ -103,11 +117,13 @@
   padding: var(--pad); 
   display:flex;
   justify-content:center;
+   min-width: 0; /* чтобы контент не ломался из-за сайдбара при маленькой ширине */
 }
 
 .page{
   width:100%; 
   max-width: var(--maxW);
+  min-width: 0;
 
   /* ВАЖНО: запас снизу, чтобы sticky футеры (меню/корзина)
      не перекрывали последние карточки на мобильных и desktop */
@@ -131,4 +147,9 @@
 @keyframes pageEnter{
   from{ opacity: 0; transform: translateY(6px); }
   to{ opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 480px){
+  body{
+    position: relative;
+  }
 }

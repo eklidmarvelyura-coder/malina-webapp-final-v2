@@ -109,7 +109,7 @@
   margin: 10px 0 6px;
   font-size: 20px;
   letter-spacing: -0.2px;
-}
+ 
 .price{
   font-weight: 900;
   opacity: 0.95;
@@ -369,4 +369,11 @@
 
 .map-actions{
   margin-top: 12px;
+}
+
+/* чтобы длинные строки не распирали контейнер */
+.sum-name,
+.nav-txt,
+h1, h2, h3, p{
+  overflow-wrap: anywhere;
 }
