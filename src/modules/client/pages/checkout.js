@@ -77,6 +77,7 @@ export function renderCheckoutPage(ctx) {
   function render() {
     const cartItems = store.cart.selectors.items();
     const order = buildOrder(cartItems);
+    const canSend = pageState.mode === "pickup" || !!pageState.geo;
 
     // если корзина пустая — нечего оформлять
     if (order.items.length === 0) {
@@ -148,7 +149,15 @@ export function renderCheckoutPage(ctx) {
             <div class="sum-total-val">${order.total} ฿</div>
           </div>
 
-          <button class="primary" id="sendOrderBtn">Отправить заказ</button>
+          <button class="primary" id="sendOrderBtn" ${canSend ? "" : "disabled"}>
+  Отправить заказ
+</button>
+
+${!canSend ? `
+  <div class="field-err" style="margin-top:10px;">
+    Для доставки нужно разрешить геолокацию 📍
+  </div>
+` : ""}
 
           <div class="muted" style="font-size:12px; margin-top:10px;">
             Следующий шаг: бот примет заказ и отправит в канал “Заказы”.
@@ -188,7 +197,9 @@ export function renderCheckoutPage(ctx) {
 
     // ✅ отправка заказа (и ТОЛЬКО тут чистим корзину)
     wrap.querySelector("#sendOrderBtn").onclick = () => {
-      const tgUser = getTgUser(tg);
+      if (!canSend) return;
+
+        const tgUser = getTgUser(tg);
 
       const payload = {
         type: "order",
