@@ -22,9 +22,9 @@ export function openCafeMapModal() {
     `${lon - 0.01}%2C${lat - 0.01}%2C${lon + 0.01}%2C${lat + 0.01}` +
     `&layer=mapnik&marker=${lat}%2C${lon}`;
 
-  const gmapsUrl = CAFE.googlePlaceId
-  ? `https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(CAFE.googlePlaceId)}`
-  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(CAFE.googleQuery || `${lat},${lon}`)}`;
+  const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  CAFE.googleQuery || `${lat},${lon}`
+)}`;
 
 
   overlay.innerHTML = `
@@ -65,14 +65,15 @@ export function openCafeMapModal() {
 
   overlay.querySelector("#openGoogleMaps").onclick = () => {
     // В WebView иногда лучше открывать в системном браузере
-   try {
-  if (tg?.openLink) {
-    tg.openLink(gmapsUrl);
-  } else {
-    window.open(gmapsUrl, "_blank");
-  }
+   const tg = window.Telegram?.WebApp;
+
+try {
+  if (tg?.openLink) tg.openLink(gmapsUrl);
+  else window.open(gmapsUrl, "_blank");
+  close();
 } catch {
   toast.info("Не удалось открыть Google Maps. Попробуй ещё раз.", 2600);
 }
+
   };
 }
