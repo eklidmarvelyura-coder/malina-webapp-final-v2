@@ -4,6 +4,8 @@ import { renderClientNav } from "./pages/nav.js";
 import { renderMenuPage } from "./pages/menu.js";
 import { renderCartPage } from "./pages/cart.js";
 import { renderFeedbackPage } from "./pages/feedback.js";
+import { renderCheckoutPage } from "./pages/checkout.js";
+
 
 // ВАЖНО: about может быть временно отсутствующим.
 // Мы импортируем его, но ещё и страхуемся try/catch при рендере.
@@ -34,6 +36,7 @@ export function mountClientApp(store, tg) {
         else if (route === "cart") cleanup = renderCartPage(ctx);
         else if (route === "feedback") cleanup = renderFeedbackPage(ctx);
         else if (route === "about") cleanup = renderAboutPage(ctx);
+        else if (route === "checkout") cleanup = renderCheckoutPage(ctx);
         else cleanup = renderMenuPage(ctx);
       } catch (err) {
         console.error("Page render failed:", route, err);

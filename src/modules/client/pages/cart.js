@@ -141,9 +141,9 @@ export function renderCartPage(ctx) {
   content.addEventListener("click", onClick);
 
   checkoutBtn.onclick = () => {
-    // пока без сервера — следующим шагом сделаем checkout page
-    alert("Следующий шаг: форма оформления заказа 🙂");
-  };
+  navigate("checkout", ctx);
+};
+
 
   // Первый рендер
   render();
