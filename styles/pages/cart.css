@@ -4,7 +4,7 @@
 
 #cartBody{
   margin: 0 18px;
-  padding-bottom: 220px; /* запас под sticky footer */
+  padding-bottom: 150px; /* запас под sticky footer */
 }
 
 /* Карточка корзины (на базе product-card) */

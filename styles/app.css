@@ -133,3 +133,17 @@
   from{ opacity: 0; transform: translateY(6px); }
   to{ opacity: 1; transform: translateY(0); }
 }
+@media (max-width: 720px){
+  .sidebar{
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    overflow: hidden; /* чтобы он сам не скроллился */
+    z-index: 1000;
+  }
+
+  .content{
+    margin-left: var(--sidebarW);
+  }
+}

@@ -16,27 +16,38 @@ export function setCleanup(fn) {
 /**
  * Переход на страницу.
  * 1) выполняем cleanup прошлой страницы
- * 2) вызываем ctx.render(route)
+ * 2) ставим ctx.route
+ * 3) уведомляем UI (sidebar и др.)
+ * 4) вызываем ctx.render(route)
  */
 export function navigate(route, ctx) {
-  // cleanup...
-  if (ctx?.content) {
-  ctx.content.classList.remove("page-enter");
-  // reflow, чтобы анимация всегда запускалась
-  void ctx.content.offsetWidth;
-  ctx.content.classList.add("page-enter");
-}
+  // --- (1) cleanup предыдущей страницы ---
   if (typeof currentCleanup === "function") {
     try { currentCleanup(); } catch (_) {}
   }
   currentCleanup = null;
 
-  ctx.route = route;
+  // --- (2) route state ---
+  if (ctx) ctx.route = route;
 
-  // ✅ ВАЖНО: сообщаем UI (sidebar), что маршрут сменился
-  if (typeof ctx.onRouteChange === "function") {
+  // --- (3) уведомляем UI о смене маршрута ---
+  // 3.1) через ctx (быстро и локально)
+  if (typeof ctx?.onRouteChange === "function") {
     try { ctx.onRouteChange(route); } catch (_) {}
   }
 
-  ctx.render(route);
+  // 3.2) через глобальное событие (супер-надёжно, если где-то ctx потерялся)
+  window.dispatchEvent(new CustomEvent("route:changed", { detail: { route } }));
+
+  // --- (4) render страницы ---
+  ctx?.render?.(route);
+
+  // --- page-enter анимация на контейнере контента ---
+  // Делаем после render, чтобы класс применялся к уже вставленному DOM
+  if (ctx?.content) {
+    ctx.content.classList.remove("page-enter");
+    // reflow, чтобы анимация всегда запускалась
+    void ctx.content.offsetWidth;
+    ctx.content.classList.add("page-enter");
+  }
 }

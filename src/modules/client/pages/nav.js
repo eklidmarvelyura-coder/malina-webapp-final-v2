@@ -2,27 +2,25 @@
 import { navigate } from "../../../shared/router.js";
 import { openCafeMapModal } from "../../../shared/components/mapModal.js";
 
-
 /**
- * Sidebar navigation (под createStore + cartStore из твоей архитектуры):
- * - badge берём из store.cart.selectors.countAll()
+ * Sidebar navigation:
+ * - badge: store.cart.selectors.countAll()
  * - badge скрыт, когда товаров 0
  * - active подсветка текущей страницы
- * - "Мы на карте" вернули (пока stub)
+ * - "Мы на карте" открывает модалку
  */
 export function renderClientNav(sidebar, ctx) {
   const store = ctx.store;
 
   sidebar.innerHTML = `
     <div class="nav-top">
+
       <button class="nav-item" data-route="map" id="navMapBtn">
         <div class="nav-ico">📍</div>
         <div class="nav-txt">Мы на карте</div>
       </button>
 
-      
-
-      <button class="nav-item" data-route="menu">
+      <button class="nav-item" data-route="menu" id="navMenuBtn">
         <div class="nav-ico">🍽</div>
         <div class="nav-txt">Меню</div>
       </button>
@@ -33,10 +31,11 @@ export function renderClientNav(sidebar, ctx) {
         <span class="nav-badge hidden" id="cartBadge">0</span>
       </button>
 
-      <button class="nav-item" data-route="feedback">
+      <button class="nav-item" data-route="feedback" id="navFeedbackBtn">
         <div class="nav-ico">💬</div>
         <div class="nav-txt">Связь</div>
       </button>
+
     </div>
   `;
 
@@ -48,7 +47,6 @@ export function renderClientNav(sidebar, ctx) {
   }
 
   function getCartCount() {
-    // Под твою cartStore(): selectors.countAll() :contentReference[oaicite:2]{index=2}
     const cart = store?.cart;
     if (!cart?.selectors?.countAll) return 0;
     return Number(cart.selectors.countAll() || 0);
@@ -67,35 +65,46 @@ export function renderClientNav(sidebar, ctx) {
     badge.classList.remove("hidden");
   }
 
-  // клики
-  buttons.forEach((btn) => { 
+  // --- клики по кнопкам ---
+  buttons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const route = btn.dataset.route;
 
       if (route === "map") {
-  // ✅ Реальная карта в модалке
-  openCafeMapModal();
-  return;
-}
+        openCafeMapModal();
+        return;
+      }
 
-
-
+      // ВАЖНО: подсветку ставим сразу (ощущение “быстро”),
+      // а router потом подтвердит через route:changed
       setActive(route);
       navigate(route, ctx);
     });
   });
 
-  // старт
-  setActive(ctx.route || "menu");
-  // ✅ nav слушает изменения маршрута (переходы не только из sidebar)
-ctx.onRouteChange = (route) => {setActive(route);}; 
+  // --- 1) ctx-хук (router вызывает ctx.onRouteChange) ---
+  ctx.onRouteChange = (route) => {
+    setActive(route);
+  };
 
+  // --- 2) глобальный хук (на случай, если navigate вызвали без правильного ctx) ---
+  const onRouteChanged = (e) => {
+    const route = e.detail?.route;
+    if (!route) return;
+    setActive(route);
+  };
+  window.addEventListener("route:changed", onRouteChanged);
+
+  // стартовая подсветка
+  setActive(ctx.route || "menu");
   updateBadge();
 
-  // store.subscribe существует :contentReference[oaicite:3]{index=3}
+  // подписка на изменения стора (badge)
   const unsub = store?.subscribe?.(() => updateBadge());
 
+  // cleanup
   return () => {
     try { unsub?.(); } catch (_) {}
+    try { window.removeEventListener("route:changed", onRouteChanged); } catch (_) {}
   };
 }
