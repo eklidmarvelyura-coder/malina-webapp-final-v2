@@ -1,95 +1,154 @@
-import { PRODUCT_BY_ID } from "../../../shared/data/products.js";
-import { ProductCard } from "../../../shared/components/productCard.js";
-import { calcCartTotal } from "../../../shared/utils/cartTotals.js";
+// src/modules/client/pages/cart.js
+// Корзина "до идеала":
+// - элементы как карточки меню (стекло + фото + контролы)
+// - empty-state с кнопкой "Перейти в меню"
+// - sticky footer: Итого + кнопка оформить (disabled если пусто)
+// - корректные итоги (sum) считаем из PRODUCT_BY_ID
+
 import { renderHeader } from "../../../shared/ui/header.js";
+import { PRODUCT_BY_ID } from "../../../shared/data/products.js";
+import { navigate } from "../../../shared/router.js";
 
-export function renderCartPage(ctx) {
-  const { store, tg, content } = ctx;
+function calcTotal(cartItems) {
+  let total = 0;
+  for (const id in cartItems) {
+    const p = PRODUCT_BY_ID[id];
+    if (!p) continue;
+    total += Number(p.price || 0) * Number(cartItems[id] || 0);
+  }
+  return total;
+}
 
-  content.innerHTML = `
-    <div class="glass" id="cartHeader"></div>
+function cartToList(cartItems) {
+  // превращаем {id: qty} -> [{id, qty, product}]
+  const list = [];
+  for (const id in cartItems) {
+    const qty = Number(cartItems[id] || 0);
+    const product = PRODUCT_BY_ID[id];
+    if (!product || qty <= 0) continue;
+    list.push({ id, qty, product });
+  }
+  // можно сортировать по названию (приятнее)
+  list.sort((a, b) => (a.product.name || "").localeCompare(b.product.name || "", "ru"));
+  return list;
+}
+
+function CartItemCard({ product, qty, onPlus, onMinus }) {
+  const sum = (Number(product.price || 0) * Number(qty || 0));
+
+  return `
+    <div class="product-card cart-card">
+      <div class="card-click" style="cursor:default;">
+        <img class="card-img" src="${product.image}" alt="${product.name}">
+        <div class="cart-meta">
+          <div class="cart-title">${product.name}</div>
+          <div class="cart-sub">
+            <span class="cart-unit">${product.price} ฿</span>
+            <span class="cart-dot">•</span>
+            <span class="cart-sum">${sum} ฿</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl-btn" data-act="minus" data-id="${product.id}">−</button>
+        <span class="ctrl-count">${qty}</span>
+        <button class="ctrl-btn" data-act="plus" data-id="${product.id}">+</button>
+      </div>
+    </div>
+  `;
+}
+
+export function renderCartPage(container, ctx) {
+  // container — то место, куда рендерится страница справа от sidebar
+  container.innerHTML = `
+    <div class="menu-sticky glass">
+      <div id="cartHeader"></div>
+    </div>
+
     <div id="cartBody"></div>
 
-    <div class="cart-footer glass">
+    <div class="cart-footer">
       <div class="cart-total-row">
-        <span class="muted">Итого</span>
-        <strong id="cartTotal">0 ฿</strong>
+        <div class="muted">Итого</div>
+        <div class="cart-total-val" id="cartTotalVal">0 ฿</div>
       </div>
-      <button class="primary" id="checkoutBtn">Оформить заказ</button>
+      <button class="primary" id="checkoutBtn" disabled>Оформить заказ</button>
     </div>
   `;
 
-  renderHeader(document.getElementById("cartHeader"), { subtitle: "Корзина" });
+  // header
+  renderHeader(container.querySelector("#cartHeader"), { subtitle: "Корзина" });
 
-  const cartBody = document.getElementById("cartBody");
-  const cartTotal = document.getElementById("cartTotal");
-  const checkoutBtn = document.getElementById("checkoutBtn");
-
-  let gridEl = null;
+  const bodyEl = container.querySelector("#cartBody");
+  const totalEl = container.querySelector("#cartTotalVal");
+  const checkoutBtn = container.querySelector("#checkoutBtn");
 
   function render() {
-    const items = store.cart.selectors.items();
-    const ids = Object.keys(items).map(Number);
+    const cartItems = ctx.store.cart.selectors.items(); // {id: qty} :contentReference[oaicite:1]{index=1}
+    const list = cartToList(cartItems);
+    const total = calcTotal(cartItems);
 
-    if (ids.length === 0) {
-      cartBody.innerHTML = `
+    totalEl.textContent = `${total} ฿`;
+
+    // кнопка заказа активна только если есть товары
+    checkoutBtn.disabled = list.length === 0;
+
+    if (list.length === 0) {
+      bodyEl.innerHTML = `
         <div class="empty glass">
-          <h3>Корзина пустая</h3>
-          <p class="muted">Добавьте товары в меню</p>
+          <div class="empty-ico">🧺</div>
+          <div class="empty-title">Корзина пустая</div>
+          <div class="empty-sub">Добавьте товары в меню</div>
+          <button class="primary empty-btn" id="goMenuBtn">Перейти в меню</button>
         </div>
       `;
-      cartTotal.textContent = "0 ฿";
-      checkoutBtn.disabled = true;
-      checkoutBtn.style.opacity = "0.6";
-      gridEl = null;
+
+      bodyEl.querySelector("#goMenuBtn").onclick = () => {
+        navigate("menu", ctx);
+      };
       return;
     }
 
-    checkoutBtn.disabled = false;
-    checkoutBtn.style.opacity = "1";
-
-    cartBody.innerHTML = `
-      <div class="grid cart-grid" id="cartGrid">
-        ${ids
-          .map((id) => {
-            const product = PRODUCT_BY_ID[id];
-            const count = items[id];
-            if (!product) return "";
-            return ProductCard({ product, count, mode: "cart" });
-          })
+    bodyEl.innerHTML = `
+      <div class="grid cart-grid">
+        ${list
+          .map(({ product, qty }) =>
+            CartItemCard({
+              product,
+              qty,
+            })
+          )
           .join("")}
       </div>
     `;
-
-    cartTotal.textContent = `${calcCartTotal(items, PRODUCT_BY_ID)} ฿`;
-    gridEl = document.getElementById("cartGrid");
   }
 
-  const onCartClick = (e) => {
-    const card = e.target.closest(".product-card");
-    if (!card) return;
+  // делегирование кликов +/− (чтобы не навешивать кучу обработчиков)
+  container.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-act]");
+    if (!btn) return;
 
-    const id = Number(card.dataset.id);
-    const action = e.target.closest("[data-action]")?.dataset?.action;
+    const act = btn.dataset.act;
+    const id = Number(btn.dataset.id);
 
-    if (action === "add") store.cart.actions.add(id);
-    if (action === "remove") store.cart.actions.remove(id);
-  };
-
-  // обработчик кликов ставим на content (работает даже при перерисовке cartBody)
-  content.addEventListener("click", onCartClick);
+    if (act === "plus") ctx.store.cart.actions.add(id);
+    if (act === "minus") ctx.store.cart.actions.remove(id);
+    // store.notify вызывается автоматически обёрткой в createStore() :contentReference[oaicite:2]{index=2}
+  });
 
   checkoutBtn.onclick = () => {
-    const total = calcCartTotal(store.cart.selectors.items(), PRODUCT_BY_ID);
-    if (total <= 0) return tg.showAlert("Корзина пустая");
-    tg.showAlert("Следующий шаг: оформление заказа ✅");
+    // Пока без сервера: просто подтверждение.
+    // Следующий шаг — собрать данные доставки и отправить в Telegram bot/server.
+    alert("Скоро: оформление заказа (адрес, телефон) + отправка в канал 🙂");
   };
 
-  const unsub = store.subscribe(render);
   render();
 
+  const unsub = ctx.store.subscribe(() => render());
+
+  // cleanup для роутера
   return () => {
-    try { unsub && unsub(); } catch (_) {}
-    try { content.removeEventListener("click", onCartClick); } catch (_) {}
+    try { unsub?.(); } catch (_) {}
   };
 }

@@ -1,19 +1,66 @@
 /* ======================================================
-   CART PAGE — fix stacking + clean layout
+   CART PAGE — premium + no overlaps
    ====================================================== */
 
-/* Контейнер тела корзины (тот, куда ты рендеришь #cartBody) */
 #cartBody{
   margin: 0 18px;
-  padding-bottom: 140px; /* запас под sticky footer, чтобы контент не прятался */
+  padding-bottom: 220px; /* запас под sticky footer */
 }
 
-/* Пустая корзина — отдельной карточкой, без наложений */
+/* Карточка корзины (на базе product-card) */
+.cart-card .card-click{
+  padding: 12px;
+}
+
+.cart-meta{
+  margin-top: 10px;
+}
+
+.cart-title{
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+}
+
+.cart-sub{
+  margin-top: 6px;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  color: rgba(255,255,255,0.86);
+  font-weight: 700;
+}
+
+.cart-unit{ opacity: 0.9; }
+.cart-dot{ opacity: 0.5; }
+.cart-sum{ opacity: 1; }
+
+/* Empty state */
 .empty{
-  padding: 16px;
+  padding: 18px;
   border-radius: var(--r22);
   background: rgba(255,255,255,0.075);
   border: 1px solid rgba(255,255,255,0.12);
+  text-align:center;
+}
+
+.empty-ico{
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+
+.empty-title{
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.empty-sub{
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.empty-btn{
+  margin-top: 14px;
 }
 
 /* Footer корзины */
@@ -39,14 +86,17 @@
   margin-bottom: 10px;
 }
 
-/* Если есть grid внутри корзины */
-.cart-grid{
-  padding: 0;              /* убираем “двойной” padding от .grid */
-  margin: 0;
+.cart-total-val{
+  font-weight: 900;
 }
 
-/* На телефоне — чуть меньше отступов */
+/* grid внутри корзины */
+.cart-grid{
+  padding: 0; /* чтобы не было двойного паддинга */
+}
+
+/* Mobile */
 @media (max-width: 480px){
-  #cartBody{ margin: 0 12px; padding-bottom: 150px; }
+  #cartBody{ margin: 0 12px; padding-bottom: 240px; }
   .cart-footer{ margin: 14px 12px 12px; }
 }
