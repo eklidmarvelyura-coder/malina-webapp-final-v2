@@ -16,10 +16,10 @@
   padding: 14px; 
   display:flex;
   flex-direction:column;
-  gap: 12px;
+  gap: 12px; 
 
   position: sticky;
-  top: 10px;
+  top: 15px; 
   align-self: flex-start;
 
   height: calc(100vh - 20px); 
