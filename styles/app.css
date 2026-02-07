@@ -10,7 +10,7 @@
 
 /* Sidebar */
 .sidebar{
-  flex: 0 0 var(--sidebarW);   /* НЕ даём сайдбару сжиматься/расширяться sda*/
+  flex: 0 0 var(--sidebarW);   /* НЕ даём сайдбару сжиматься/расширяться */
   width: var(--sidebarW); 
 
   padding: 14px; 
@@ -119,10 +119,7 @@
 /* Mobile */
 @media (max-width: 480px){ 
   :root{ --sidebarW: 132px; } 
-  .sidebar{ 
-    padding: 8px; 
-    top: 7px;
-     height: calc(100vh - 16px); } 
+  .sidebar{ padding: 10px; top: 8px; height: calc(100vh - 16px); } 
 }
 
 /* =========================
