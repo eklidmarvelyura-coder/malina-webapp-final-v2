@@ -39,7 +39,7 @@ export function renderMenuPage(ctx) {
   const elCats = document.getElementById("categories");
   const elGrid = document.getElementById("productsGrid");
   const elCheckout = document.getElementById("checkoutBtn");
-  const checkoutBtn = content.querySelector("#menuCheckoutBtn");
+  //const checkoutBtn = content.querySelector("#menuCheckoutBtn");
 
   // Категории
   elCats.innerHTML = CATEGORIES.map((c) => {
@@ -76,20 +76,28 @@ export function renderMenuPage(ctx) {
     if (openedId) modalController.setCount(store.cart.selectors.getCount(openedId));
   }
 
-  const onGridClick = (e) => {
+    const onGridClick = (e) => {
     const card = e.target.closest(".product-card");
     if (!card) return;
 
     const id = Number(card.dataset.id);
+
+    // 1) Если кликнули по кнопкам +/− — меняем корзину и выходим
     const action = e.target.closest("[data-action]")?.dataset?.action;
-
-    if (action === "add") return store.cart.actions.add(id);
-    if (action === "remove") return store.cart.actions.remove(id);
-
-    if (e.target.closest('[data-action="open"]')) {
-      modalController.open(PRODUCT_BY_ID[id], store.cart.selectors.getCount(id));
+    if (action === "add") {
+      store.cart.actions.add(id);
+      return;
     }
+    if (action === "remove") {
+      store.cart.actions.remove(id);
+      return;
+    }
+
+    // 2) Во всех остальных случаях (клик по карточке) — открываем модалку
+    // Это UX-стандарт: карточка кликабельна целиком.
+    modalController.open(PRODUCT_BY_ID[id], store.cart.selectors.getCount(id));
   };
+
 
   elGrid.addEventListener("click", onGridClick);
 
