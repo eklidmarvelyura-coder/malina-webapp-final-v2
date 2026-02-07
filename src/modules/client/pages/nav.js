@@ -68,14 +68,17 @@ export function renderClientNav(sidebar, ctx) {
   }
 
   // клики
-  buttons.forEach((btn) => {
+  buttons.forEach((btn) => { 
     btn.addEventListener("click", () => {
       const route = btn.dataset.route;
 
       if (route === "map") {
-        alert("Скоро здесь будет карта кафе 🙂");
-        return;
-      }
+  // ✅ Реальная карта в модалке
+  openCafeMapModal();
+  return;
+}
+
+
 
       setActive(route);
       navigate(route, ctx);
