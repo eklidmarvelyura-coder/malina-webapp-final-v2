@@ -1,15 +1,25 @@
 /* ======================================================
-   MENU PAGE — sticky header block + sticky footer
+   MENU PAGE — sticky header + premium footer
    ====================================================== */
 
 .menu-sticky{
   position: sticky;
   top: 10px;
   z-index: 30;
-  margin-bottom: 14px;
+  margin: 0 18px 14px;
+  padding: 0;
+  overflow:hidden;
 }
 
-/* Footer with checkout button */
+/* чтобы header + категории были единым блоком */
+.menu-sticky .page-header{
+  padding: 18px 18px 8px;
+}
+.menu-sticky .categories{
+  padding: 0 18px 14px;
+}
+
+/* Footer */
 .menu-footer{
   position: sticky;
   bottom: 12px;
@@ -17,6 +27,13 @@
   margin: 0 18px 12px;
   padding: 12px;
   border-radius: var(--r22);
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.075);
   border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* На телефоне футер чуть компактнее */
+@media (max-width: 480px){
+  .menu-footer{ padding: 10px; }
 }

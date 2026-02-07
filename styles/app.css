@@ -1,5 +1,5 @@
 /* ======================================================
-   APP LAYOUT — sidebar + content (layout.js)
+   APP LAYOUT — polished v4
    ====================================================== */
 
 .app{
@@ -13,14 +13,13 @@
   padding: 14px;
   display:flex;
   flex-direction:column;
-  gap: var(--gap12);
+  gap: 12px;
 }
 
-/* Верхняя зона навигации */
 .nav-top{
   display:flex;
   flex-direction:column;
-  gap: var(--gap12);
+  gap: 12px;
 }
 
 .brand{
@@ -29,13 +28,13 @@
   justify-content:center;
   padding: 12px 10px;
   border-radius: var(--r22);
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.055);
   border: 1px solid rgba(255,255,255,0.10);
   font-weight: 900;
   letter-spacing: 0.2px;
 }
 
-/* Кнопки навигации */
+/* nav items */
 .nav-item{
   width:100%;
   border:0;
@@ -43,25 +42,30 @@
   padding: 12px 10px;
   border-radius: var(--r22);
   color: var(--text);
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.055);
   border: 1px solid rgba(255,255,255,0.10);
   text-align:center;
   transition: background 140ms ease, transform 120ms ease, border-color 140ms ease;
 }
 
 .nav-item:hover{
-  background: rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.085);
   border-color: rgba(255,255,255,0.14);
 }
 .nav-item:active{ transform: scale(0.99); }
 
+/* active state (если добавишь класс в JS) */
+.nav-item.active{
+  background: linear-gradient(135deg, rgba(255,63,122,0.35), rgba(160,19,82,0.25));
+  border-color: rgba(255,63,122,0.45);
+}
+
 .nav-ico{ font-size: 20px; line-height: 1; }
 .nav-txt{ margin-top: 6px; font-size: 12px; opacity: 0.92; }
 
-/* Нижняя зона sidebar */
 .nav-bottom{ margin-top:auto; }
 
-/* Виджет корзины */
+/* Cart widget */
 .cart-widget{
   padding: 12px;
   border-radius: var(--r22);
@@ -88,13 +92,12 @@
   justify-content:center;
 }
 
-/* Место, куда страницы рендерятся */
 .page{
   width:100%;
   max-width: var(--maxW);
 }
 
-/* Mobile tweaks */
+/* Mobile */
 @media (max-width: 480px){
   :root{ --sidebarW: 132px; }
   .sidebar{ padding: 10px; }
