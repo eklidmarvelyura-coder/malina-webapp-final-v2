@@ -1,18 +1,16 @@
 /* ======================================================
-   CHECKOUT PAGE
+   CHECKOUT PAGE — premium v2
    ====================================================== */
 
-.checkout-wrap{
-  margin: 0 18px;
-}
+.checkout-wrap{ margin: 0 18px; }
 
 .checkout-grid{
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-.checkout-form,
+.checkout-panel,
 .checkout-summary{
   padding: 14px;
   border-radius: var(--r22);
@@ -33,70 +31,40 @@
   padding: 10px 12px;
   border-radius: 999px;
   cursor:pointer;
-  font-weight: 800;
+  font-weight: 900;
 }
-
 .seg-btn.active{
   background: linear-gradient(135deg, var(--malina), var(--malinaDeep));
   border: 0;
 }
 
-/* fields */
-.field{
-  display:block;
+.checkout-note{
+  padding: 12px;
+  border-radius: var(--r18);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.note-title{ font-weight: 900; margin-bottom: 6px; }
+
+/* Geo */
+.geo-box{
   margin-top: 12px;
-}
-.field.hidden{ display:none; }
-
-.field-label{
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-
-.text-input{
-  width: 100%;
-  height: 44px;
-  padding: 10px 12px;
+  padding: 12px;
   border-radius: var(--r18);
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.07);
-  color: var(--text);
-  outline: none;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
 }
+.geo-title{ font-weight: 900; }
+.geo-sub{ margin: 6px 0 12px; }
 
-.text-area{
-  width: 100%;
-  min-height: 96px;
-  padding: 10px 12px;
-  border-radius: var(--r18);
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.07);
-  color: var(--text);
-  outline: none;
-  resize: vertical;
-}
-
-.text-input:focus,
-.text-area:focus{
-  border-color: rgba(255,63,122,0.55);
-}
-
-.field-err{
-  margin-top: 6px;
-  font-size: 12px;
-  font-weight: 800;
-  color: rgba(255,120,160,0.95);
-}
-
-/* summary */
+/* Summary cards */
 .sum-title{
   font-weight: 900;
   font-size: 16px;
   margin-bottom: 10px;
 }
 
-.sum-list{
+.sum-cards{
   display:flex;
   flex-direction:column;
   gap: 10px;
@@ -105,14 +73,47 @@
   border-bottom: 1px solid rgba(255,255,255,0.10);
 }
 
-.sum-row{
+.sum-card{
   display:flex;
-  justify-content:space-between;
   gap: 12px;
+  align-items:center;
+
+  padding: 10px;
+  border-radius: var(--r18);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
 }
 
-.sum-name{ font-weight: 800; }
-.sum-val{ font-weight: 900; }
+.sum-img{
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  object-fit: cover;
+  flex: 0 0 54px;
+}
+
+.sum-info{ flex: 1; min-width: 0; }
+
+.sum-name{
+  font-weight: 900;
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+}
+.sum-meta{
+  margin-top: 6px;
+  display:flex;
+  gap: 8px;
+  align-items:center;
+  font-size: 13px;
+}
+.dot{ opacity: 0.45; }
+
+.sum-right{
+  flex: 0 0 auto;
+  font-weight: 900;
+}
+.sum-line{ font-size: 14px; }
 
 .sum-total{
   display:flex;
@@ -125,7 +126,7 @@
   font-size: 18px;
 }
 
-/* mobile */
+/* Mobile */
 @media (max-width: 860px){
   .checkout-grid{ grid-template-columns: 1fr; }
 }

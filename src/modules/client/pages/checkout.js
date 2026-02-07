@@ -1,14 +1,16 @@
 // src/modules/client/pages/checkout.js
-// Страница оформления заказа (UI + валидация + подготовка payload)
-//
-// Сейчас: отправляем payload через Telegram.WebApp.sendData()
-// Далее: будем принимать его ботом/сервером и слать в канал.
+// Checkout v2 (без форм имени/телефона):
+// - берём пользователя из Telegram (если доступно)
+// - красивый список заказа карточками
+// - выбор: доставка / самовывоз
+// - кнопка "Определить геолокацию" (если пользователь разрешит)
+// - tg.sendData(payload) с order + user + geo
 
 import { renderHeader } from "../../../shared/ui/header.js";
 import { PRODUCT_BY_ID } from "../../../shared/data/products.js";
 import { navigate } from "../../../shared/router.js";
 
-function buildOrderFromCart(cartItems) {
+function buildOrder(cartItems) {
   const items = [];
   let total = 0;
 
@@ -19,43 +21,39 @@ function buildOrderFromCart(cartItems) {
     const p = PRODUCT_BY_ID[id];
     if (!p) continue;
 
-    const lineSum = Number(p.price || 0) * qty;
-    total += lineSum;
+    const sum = Number(p.price || 0) * qty;
+    total += sum;
 
     items.push({
       id: Number(id),
       name: p.name,
       price: Number(p.price || 0),
       qty,
-      sum: lineSum,
+      sum,
+      image: p.image,
     });
   }
 
+  // красиво: сначала по категории/имени можно позже
+  items.sort((a, b) => a.name.localeCompare(b.name, "ru"));
   return { items, total };
 }
 
-function onlyDigits(str) {
-  return (str || "").replace(/\D/g, "");
-}
-
-function validate(form, order) {
-  const errors = {};
-
-  if (order.items.length === 0) errors.cart = "Корзина пустая";
-
-  const name = (form.name || "").trim();
-  if (name.length < 2) errors.name = "Введите имя";
-
-  const phoneDigits = onlyDigits(form.phone);
-  // Очень мягкая проверка: 9–15 цифр
-  if (phoneDigits.length < 9 || phoneDigits.length > 15) errors.phone = "Введите телефон";
-
-  if (form.mode === "delivery") {
-    const address = (form.address || "").trim();
-    if (address.length < 6) errors.address = "Введите адрес доставки";
+function getTgUser(tg) {
+  // Telegram WebApp даёт user в initDataUnsafe (если открыто из бота)
+  try {
+    const u = tg?.initDataUnsafe?.user;
+    if (!u) return null;
+    return {
+      id: u.id,
+      first_name: u.first_name,
+      last_name: u.last_name,
+      username: u.username,
+      language_code: u.language_code,
+    };
+  } catch (_) {
+    return null;
   }
-
-  return errors;
 }
 
 export function renderCheckoutPage(ctx) {
@@ -69,31 +67,27 @@ export function renderCheckoutPage(ctx) {
     <div class="checkout-wrap" id="checkoutWrap"></div>
   `;
 
-  renderHeader(content.querySelector("#checkoutHeader"), { subtitle: "Оформление заказа" });
+  renderHeader(content.querySelector("#checkoutHeader"), { subtitle: "Оформление" });
 
   const wrap = content.querySelector("#checkoutWrap");
 
-  // Локальное состояние формы (без глобального стора — проще)
-  const form = {
-    mode: "delivery",  // delivery | pickup
-    name: "",
-    phone: "",
-    address: "",
-    comment: "",
+  // локальное состояние
+  const state = {
+    mode: "delivery", // delivery | pickup
+    geo: null,        // {lat, lon, accuracy}
   };
 
   function render() {
     const cartItems = store.cart.selectors.items();
-    const order = buildOrderFromCart(cartItems);
-    const errors = validate(form, order);
+    const order = buildOrder(cartItems);
 
-    // Если корзина пустая — показываем красивую заглушку + кнопку назад
+    // пусто
     if (order.items.length === 0) {
       wrap.innerHTML = `
         <div class="empty glass">
           <div class="empty-ico">🧺</div>
           <div class="empty-title">Нечего оформлять</div>
-          <div class="empty-sub">Добавьте товары в корзину</div>
+          <div class="empty-sub">Добавь товары в меню</div>
           <button class="primary empty-btn" id="goMenuBtn">Перейти в меню</button>
         </div>
       `;
@@ -103,52 +97,56 @@ export function renderCheckoutPage(ctx) {
 
     wrap.innerHTML = `
       <div class="checkout-grid">
-        <!-- Левая колонка: форма -->
-        <div class="checkout-form glass-lite">
+        <!-- Левый блок: доставка/самовывоз + гео -->
+        <div class="checkout-panel glass-lite">
           <div class="segmented">
-            <button class="seg-btn ${form.mode === "delivery" ? "active" : ""}" data-mode="delivery">Доставка</button>
-            <button class="seg-btn ${form.mode === "pickup" ? "active" : ""}" data-mode="pickup">Самовывоз</button>
+            <button class="seg-btn ${state.mode === "delivery" ? "active" : ""}" data-mode="delivery">Доставка</button>
+            <button class="seg-btn ${state.mode === "pickup" ? "active" : ""}" data-mode="pickup">Самовывоз</button>
           </div>
 
-          <label class="field">
-            <div class="field-label">Имя</div>
-            <input class="text-input" id="fName" placeholder="Как к вам обращаться" value="${escapeHtml(form.name)}">
-            ${errors.name ? `<div class="field-err">${errors.name}</div>` : ""}
-          </label>
+          <div class="checkout-note">
+            <div class="note-title">Данные клиента</div>
+            <div class="muted">
+              Мы берём профиль из Telegram. Телефон Telegram не отдаёт автоматически —
+              позже добавим запрос контакта через бота (один раз).
+            </div>
+          </div>
 
-          <label class="field">
-            <div class="field-label">Телефон</div>
-            <input class="text-input" id="fPhone" placeholder="+66..." value="${escapeHtml(form.phone)}">
-            ${errors.phone ? `<div class="field-err">${errors.phone}</div>` : ""}
-          </label>
+          <div class="geo-box">
+            <div class="geo-title">Локация</div>
+            <div class="muted geo-sub">
+              ${state.geo
+                ? `Определено: ${state.geo.lat.toFixed(5)}, ${state.geo.lon.toFixed(5)} (±${Math.round(state.geo.accuracy)}м)`
+                : `Не определена. Нажми кнопку ниже — браузер спросит разрешение.`}
+            </div>
 
-          <label class="field ${form.mode === "pickup" ? "hidden" : ""}">
-            <div class="field-label">Адрес доставки</div>
-            <textarea class="text-area" id="fAddress" placeholder="Улица, дом, этаж, ориентир">${escapeHtml(form.address)}</textarea>
-            ${errors.address ? `<div class="field-err">${errors.address}</div>` : ""}
-          </label>
-
-          <label class="field">
-            <div class="field-label">Комментарий</div>
-            <textarea class="text-area" id="fComment" placeholder="Например: без сахара, позвонить у подъезда...">${escapeHtml(form.comment)}</textarea>
-          </label>
+            <button class="primary" id="geoBtn">
+              ${state.geo ? "Обновить геолокацию" : "Определить геолокацию"}
+            </button>
+          </div>
         </div>
 
-        <!-- Правая колонка: краткое резюме -->
+        <!-- Правый блок: красивый заказ -->
         <div class="checkout-summary glass-lite">
           <div class="sum-title">Ваш заказ</div>
 
-          <div class="sum-list">
-            ${order.items
-              .map(
-                (it) => `
-                <div class="sum-row">
-                  <div class="sum-name">${it.name} <span class="muted">× ${it.qty}</span></div>
-                  <div class="sum-val">${it.sum} ฿</div>
+          <div class="sum-cards" id="sumCards">
+            ${order.items.map(it => `
+              <div class="sum-card">
+                <img class="sum-img" src="${it.image}" alt="${it.name}">
+                <div class="sum-info">
+                  <div class="sum-name">${it.name}</div>
+                  <div class="sum-meta">
+                    <span class="muted">${it.price} ฿</span>
+                    <span class="dot">•</span>
+                    <span class="muted">× ${it.qty}</span>
+                  </div>
                 </div>
-              `
-              )
-              .join("")}
+                <div class="sum-right">
+                  <div class="sum-line">${it.sum} ฿</div>
+                </div>
+              </div>
+            `).join("")}
           </div>
 
           <div class="sum-total">
@@ -156,72 +154,58 @@ export function renderCheckoutPage(ctx) {
             <div class="sum-total-val">${order.total} ฿</div>
           </div>
 
-          <button class="primary" id="sendOrderBtn" ${Object.keys(errors).length ? "disabled" : ""}>
+          <button class="primary" id="sendOrderBtn">
             Отправить заказ
           </button>
 
-          ${errors.cart ? `<div class="field-err" style="margin-top:10px;">${errors.cart}</div>` : ""}
-          ${
-            Object.keys(errors).length
-              ? `<div class="muted" style="font-size:12px; margin-top:10px;">
-                   Заполните обязательные поля, чтобы отправить заказ.
-                 </div>`
-              : `<div class="muted" style="font-size:12px; margin-top:10px;">
-                   После отправки заказ улетит в Telegram (дальше подключим бот/сервер).
-                 </div>`
-          }
+          <div class="muted" style="font-size:12px; margin-top:10px;">
+            Следующий шаг: бот примет заказ и отправит в канал “Заказы”.
+          </div>
         </div>
       </div>
     `;
 
-    // --- Обработчики ---
-    // Segmented
-    wrap.querySelectorAll(".seg-btn").forEach((b) => {
-      b.onclick = () => {
-        form.mode = b.dataset.mode;
+    // переключатель режимов
+    wrap.querySelectorAll(".seg-btn").forEach(btn => {
+      btn.onclick = () => {
+        state.mode = btn.dataset.mode;
         render();
       };
     });
 
-    // Inputs
-    const fName = wrap.querySelector("#fName");
-    const fPhone = wrap.querySelector("#fPhone");
-    const fAddress = wrap.querySelector("#fAddress");
-    const fComment = wrap.querySelector("#fComment");
-
-    fName.oninput = () => { form.name = fName.value; };
-    fPhone.oninput = () => { form.phone = fPhone.value; };
-    if (fAddress) fAddress.oninput = () => { form.address = fAddress.value; };
-    fComment.oninput = () => { form.comment = fComment.value; };
-
-    // Send order
-    const sendBtn = wrap.querySelector("#sendOrderBtn");
-    sendBtn.onclick = () => {
-      const cartNow = store.cart.selectors.items();
-      const orderNow = buildOrderFromCart(cartNow);
-      const errNow = validate(form, orderNow);
-
-      if (Object.keys(errNow).length) {
-        // Ререндер, чтобы показать ошибки
-        render();
+    // геолокация
+    wrap.querySelector("#geoBtn").onclick = () => {
+      if (!navigator.geolocation) {
+        alert("Геолокация не поддерживается этим устройством/браузером");
         return;
       }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          state.geo = {
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude,
+            accuracy: pos.coords.accuracy,
+          };
+          render();
+        },
+        () => alert("Не удалось получить геолокацию. Проверь разрешения."),
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    };
 
+    // отправка
+    wrap.querySelector("#sendOrderBtn").onclick = () => {
+      const tgUser = getTgUser(tg);
       const payload = {
         type: "order",
         createdAt: Date.now(),
-        mode: form.mode, // delivery/pickup
-        customer: {
-          name: form.name.trim(),
-          phone: onlyDigits(form.phone),
-          address: form.mode === "delivery" ? form.address.trim() : "",
-          comment: form.comment.trim(),
-        },
-        order: orderNow,
+        mode: state.mode,
+        user: tgUser,
+        geo: state.geo,        // может быть null
+        order: order,          // items + total
       };
 
-      // Telegram WebApp (если запущено не в TG — просто покажем alert)
-      if (tg && typeof tg.sendData === "function") {
+      if (tg?.sendData) {
         tg.sendData(JSON.stringify(payload));
         alert("Заказ отправлен ✅");
       } else {
@@ -229,29 +213,13 @@ export function renderCheckoutPage(ctx) {
         alert("Открыто не в Telegram — payload в консоли ✅");
       }
 
-      // Дальше можно:
-      // - чистить корзину (когда добавим действие clear())
-      // - перекидывать на страницу "Спасибо"
+      // потом сделаем: страницу "Спасибо" + очистку корзины
       navigate("menu", ctx);
     };
   }
 
-  // безопасный escape для инпутов/textarea
-  function escapeHtml(s) {
-    return String(s ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
   render();
-
-  // Если корзина поменялась в другом месте — обновляем summary
   const unsub = store.subscribe(() => render());
 
-  return () => {
-    try { unsub?.(); } catch (_) {}
-  };
+  return () => { try { unsub?.(); } catch (_) {} };
 }

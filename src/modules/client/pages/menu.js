@@ -3,6 +3,7 @@ import { PRODUCTS, PRODUCT_BY_ID, CATEGORIES } from "../../../shared/data/produc
 import { ProductCard } from "../../../shared/components/productCard.js";
 import { createProductModal } from "../../../shared/components/modal.js";
 import { calcCartTotal } from "../../../shared/utils/cartTotals.js";
+import { navigate } from "../../../shared/router.js";
 
 
 let modalController = null;
@@ -10,6 +11,8 @@ let currentCategory = "all";
 
 export function renderMenuPage(ctx) {
   const { store, tg, content } = ctx;
+  
+
 
   content.innerHTML = `
     <div class="menu-sticky glass" id="menuSticky"></div>
@@ -36,6 +39,7 @@ export function renderMenuPage(ctx) {
   const elCats = document.getElementById("categories");
   const elGrid = document.getElementById("productsGrid");
   const elCheckout = document.getElementById("checkoutBtn");
+  const checkoutBtn = content.querySelector("#menuCheckoutBtn");
 
   // Категории
   elCats.innerHTML = CATEGORIES.map((c) => {
@@ -62,7 +66,11 @@ export function renderMenuPage(ctx) {
       .join("");
 
     const total = calcCartTotal(items, PRODUCT_BY_ID);
-    elCheckout.textContent = total > 0 ? `Оформить заказ • ${total} ฿` : "Оформить заказ";
+
+     // текст + доступность кнопки
+     elCheckout.textContent = total > 0 ? `Оформить заказ • ${total} ฿` : "Оформить заказ";
+     elCheckout.disabled = total <= 0;
+
 
     const openedId = modalController.getCurrentId();
     if (openedId) modalController.setCount(store.cart.selectors.getCount(openedId));
@@ -86,10 +94,13 @@ export function renderMenuPage(ctx) {
   elGrid.addEventListener("click", onGridClick);
 
   elCheckout.onclick = () => {
-    const total = calcCartTotal(store.cart.selectors.items(), PRODUCT_BY_ID);
-    if (total <= 0) return tg.showAlert("Корзина пустая");
-    tg.showAlert("Дальше сделаем оформление заказа ✅");
-  };
+  const total = calcCartTotal(store.cart.selectors.items(), PRODUCT_BY_ID);
+  if (total <= 0) return; // кнопка и так disabled
+
+  // Переходим на checkout page
+  navigate("checkout", ctx);
+};
+
 
   // Подписка на store
   const unsub = store.subscribe(renderList);
