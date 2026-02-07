@@ -227,7 +227,7 @@ export function renderCheckoutPage(ctx) {
           toast.success("Геолокация получена ✅");
           render();
         },
-        () => toast.error("Не удалось получить геолокацию. Проверь разрешения."),
+        () => toast.error("Не удалось получить геолокацию. Проверь свои разрешения."),
         { enableHighAccuracy: true, timeout: 10000 }
       );
     };
