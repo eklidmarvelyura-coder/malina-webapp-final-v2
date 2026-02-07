@@ -13,8 +13,8 @@ export function renderClientNav(sidebar, ctx) {
 
   sidebar.innerHTML = `
     <div class="nav-top">
-    <div class="brand">🍓</div> 
-    
+     
+
       <button class="nav-item" data-route="map" id="navMapBtn">
         <div class="nav-ico">📍</div>
         <div class="nav-txt">Мы на карте</div>
