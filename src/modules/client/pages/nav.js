@@ -1,16 +1,15 @@
 // src/modules/client/pages/nav.js
-// Клиентский sidebar.
-// Принципы (важно понять):
-// 1) Sidebar — это "вид", он НЕ хранит данные.
-// 2) Данные берём из store (cartStore), чтобы всё было синхронно.
-// 3) Сайдбар подписывается на store.subscribe(), чтобы сумма обновлялась мгновенно.
-
 import { navigate } from "../../../shared/router.js";
-import { PRODUCT_BY_ID } from "../../../shared/data/products.js";
-import { calcCartTotal } from "../../../shared/utils/cartTotals.js";
 
+/**
+ * Sidebar navigation.
+ * - Содержит 3 кнопки: Menu / Cart / Feedback
+ * - Badge на "Корзина" появляется только если товаров > 0
+ * - Подсветка активной страницы
+ */
 export function renderClientNav(sidebar, ctx) {
-  // 1) Рендерим навигацию БЕЗ нижней панели
+  const { store } = ctx;
+
   sidebar.innerHTML = `
     <div class="nav-top">
       <div class="brand">🍓</div>
@@ -33,28 +32,18 @@ export function renderClientNav(sidebar, ctx) {
     </div>
   `;
 
-  // 2) Навигация по клику + активное состояние
   const buttons = Array.from(sidebar.querySelectorAll(".nav-item"));
-
-  function setActive(route) {
-    buttons.forEach(b => b.classList.toggle("active", b.dataset.route === route));
-  }
-
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const route = btn.dataset.route;
-      setActive(route);
-      navigate(route, ctx);
-    });
-  });
-
-  // 3) Badge: количество товаров в корзине
   const badge = sidebar.querySelector("#cartBadge");
 
-  function calcItemsCount(cartState) {
-    // Поддержим обе структуры:
-    // a) cart.items = { [id]: qty }
-    // b) cart = { [id]: qty }
+  function setActive(route) {
+    buttons.forEach((b) => b.classList.toggle("active", b.dataset.route === route));
+  }
+
+  // Универсально считаем кол-во товаров.
+  // Поддержим две структуры:
+  // - state.cart.items = { [id]: qty }
+  // - state.cart = { [id]: qty }
+  function calcCountFromState(cartState) {
     const items = cartState?.items ?? cartState ?? {};
     let count = 0;
     for (const k in items) count += Number(items[k] || 0);
@@ -62,28 +51,40 @@ export function renderClientNav(sidebar, ctx) {
   }
 
   function updateBadge() {
-    const cartState = ctx.store.getState().cart;
-    const count = calcItemsCount(cartState);
+    const cartState = store.getState().cart;
+    const count = calcCountFromState(cartState);
 
-    if (count > 0) {
-      badge.textContent = String(count);
-      badge.classList.remove("hidden");
-    } else {
-      badge.textContent = "0";
+    // Если 0 — badge скрываем полностью (чтобы кнопка была “красивая”)
+    if (count <= 0) {
       badge.classList.add("hidden");
+      badge.textContent = "0";
+      return;
     }
+
+    badge.textContent = String(count);
+    badge.classList.remove("hidden");
   }
 
+  // Навигация по клику
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const route = btn.dataset.route;
+      setActive(route);
+      navigate(route, ctx);
+    });
+  });
+
+  // Стартовое состояние
+  setActive(ctx.route || "menu");
   updateBadge();
 
-  // подписка на store, чтобы badge обновлялся всегда
-  const unsub = ctx.store.subscribe(() => {
+  // Подписка на store — badge обновляется при любом изменении корзины
+  const unsub = store.subscribe(() => {
     updateBadge();
   });
 
-  // выставляем активную при старте
-  setActive(ctx.route || "menu");
-
-  // cleanup — важно, чтобы не копились подписки при перемонтировании
-  return () => unsub?.();
+  // cleanup (на будущее, если sidebar будут перемонтировать)
+  return () => {
+    try { unsub?.(); } catch (_) {}
+  };
 }
