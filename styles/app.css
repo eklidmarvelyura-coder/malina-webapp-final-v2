@@ -9,21 +9,24 @@
 
 /* Sidebar */
 .sidebar{
+  flex: 0 0 var(--sidebarW);   /* НЕ даём сайдбару сжиматься/расширяться */
   width: var(--sidebarW);
+
   padding: 14px;
   display:flex;
   flex-direction:column;
   gap: 12px;
 
-  /* ключевое: sidebar всегда в видимой зоне */
   position: sticky;
   top: 10px;
   align-self: flex-start;
 
-  /* чтобы sticky работал корректно и сайдбар не “растягивался” */
   height: calc(100vh - 20px);
   overflow: auto;
+
+  scrollbar-gutter: stable; /* чтобы ширина не менялась из-за скроллбара */
 }
+
 
 /* чтобы скролл сайдбара не выглядел ужасно на ПК */
 .sidebar::-webkit-scrollbar{ width: 6px; }

@@ -2,19 +2,17 @@
 import { navigate } from "../../../shared/router.js";
 
 /**
- * Универсальный sidebar:
- * - "Мы на карте"
- * - Меню / Корзина (badge) / Связь
- * - Active подсветка
- * - Badge не ломает приложение, даже если store устроен нестандартно
+ * Sidebar navigation (под createStore + cartStore из твоей архитектуры):
+ * - badge берём из store.cart.selectors.countAll()
+ * - badge скрыт, когда товаров 0
+ * - active подсветка текущей страницы
+ * - "Мы на карте" вернули (пока stub)
  */
 export function renderClientNav(sidebar, ctx) {
-  const store = ctx.store; // может быть любым
+  const store = ctx.store;
 
   sidebar.innerHTML = `
     <div class="nav-top">
-     
-
       <button class="nav-item" data-route="map" id="navMapBtn">
         <div class="nav-ico">📍</div>
         <div class="nav-txt">Мы на карте</div>
@@ -47,41 +45,15 @@ export function renderClientNav(sidebar, ctx) {
     buttons.forEach((b) => b.classList.toggle("active", b.dataset.route === route));
   }
 
-  // ---- Универсально получаем state из стора ----
-  function getStateSafe() {
-    try {
-      if (!store) return null;
-      if (typeof store.getState === "function") return store.getState();
-      if (typeof store.get === "function") return store.get();
-      if (store.state) return store.state;
-      return null;
-    } catch (e) {
-      console.warn("getStateSafe error:", e);
-      return null;
-    }
-  }
-
-  // ---- Считаем товары в корзине ----
-  function calcCountFromState(state) {
-    // поддержка вариантов:
-    // state.cart.items
-    // state.cart
-    // state.cartStore/items
-    const cartState =
-      state?.cart ??
-      state?.cartStore ??
-      state?.stores?.cart ??
-      null;
-
-    const items = cartState?.items ?? cartState ?? {};
-    let count = 0;
-    for (const k in items) count += Number(items[k] || 0);
-    return count;
+  function getCartCount() {
+    // Под твою cartStore(): selectors.countAll() :contentReference[oaicite:2]{index=2}
+    const cart = store?.cart;
+    if (!cart?.selectors?.countAll) return 0;
+    return Number(cart.selectors.countAll() || 0);
   }
 
   function updateBadge() {
-    const state = getStateSafe();
-    const count = state ? calcCountFromState(state) : 0;
+    const count = getCartCount();
 
     if (count <= 0) {
       badge.classList.add("hidden");
@@ -93,16 +65,12 @@ export function renderClientNav(sidebar, ctx) {
     badge.classList.remove("hidden");
   }
 
-  // ---- Клик по кнопкам ----
+  // клики
   buttons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const route = btn.dataset.route;
 
-      // MAP — пока без отдельной страницы:
-      // делаем popup/alert, а позже сделаем полноценный modal с картой.
       if (route === "map") {
-        // Telegram WebApp: showPopup может быть не поддержан в старых версиях.
-        // Поэтому используем простой alert.
         alert("Скоро здесь будет карта кафе 🙂");
         return;
       }
@@ -116,11 +84,8 @@ export function renderClientNav(sidebar, ctx) {
   setActive(ctx.route || "menu");
   updateBadge();
 
-  // ---- Подписка на store (если есть) ----
-  let unsub = null;
-  if (store && typeof store.subscribe === "function") {
-    unsub = store.subscribe(() => updateBadge());
-  }
+  // store.subscribe существует :contentReference[oaicite:3]{index=3}
+  const unsub = store?.subscribe?.(() => updateBadge());
 
   return () => {
     try { unsub?.(); } catch (_) {}
