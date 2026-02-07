@@ -1,6 +1,6 @@
-/* ===========================================
+/* ======================================================
    FEEDBACK PAGE
-   =========================================== */
+   ====================================================== */
 
 .feedback-form{
   display:flex;
@@ -10,10 +10,5 @@
   border-radius: var(--r22);
 }
 
-.feedback-form .input{
-  width: 100%;
-}
-
-.feedback-form .primary{
-  width: 100%;
-}
+.feedback-form .input{ width:100%; }
+.feedback-form .primary{ width:100%; }

@@ -1,65 +1,61 @@
-/* ============================
-   TOKENS: базовые переменные
-   ============================ */
+/* ======================================================
+   TOKENS — единые переменные, размеры, типографика
+   ====================================================== */
 
 :root{
-  /* базовые цвета */
-  --bg0: #0a0a12;
-  --bg1: #10121d;
-  --text: rgba(255,255,255,0.92);
-  --muted: rgba(255,255,255,0.70);
+  /* Base colors */
+  --bg0:#070812;
+  --bg1:#0d1020;
 
-  /* малиновая тема */
-  --malina: #ff3f7a;
-  --malina2: #ff5b90;
-  --malinaDeep: #a01352;
+  --text: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.70);
 
-  /* нейтральные серые */
-  --grayA: rgba(255,255,255,0.12);
-  --grayB: rgba(255,255,255,0.16);
+  /* Malina palette */
+  --malina:#ff3f7a;
+  --malina2:#ff5b90;
+  --malinaDeep:#a01352;
 
-  /* стекло */
-  --glassBg: rgba(255,255,255,0.08);
-  --glassBg2: rgba(255,255,255,0.10);
-  --glassBorder: rgba(255,255,255,0.12);
+  /* Glass */
+  --glassA: rgba(255,255,255,.10);
+  --glassB: rgba(255,255,255,.07);
+  --glassBorder: rgba(255,255,255,.13);
 
-  /* радиусы */
-  --r12: 12px;
-  --r16: 16px;
-  --r18: 18px;
-  --r22: 22px;
-  --r28: 28px;
+  /* Shadows */
+  --shadowSoft: 0 18px 55px rgba(0,0,0,.38);
+  --shadowBtn: 0 18px 40px rgba(255,63,122,.18);
 
-  /* тени */
-  --shadowSoft: 0 18px 55px rgba(0,0,0,0.35);
-  --shadowBtn: 0 18px 40px rgba(255,63,122,0.16);
+  /* Radii */
+  --r14:14px;
+  --r18:18px;
+  --r22:22px;
+  --r28:28px;
 
-  /* типографика */
+  /* Layout */
+  --sidebarW: 152px;
+  --maxW: 1120px;
+  --pad: 16px;
+
+  /* Typography */
   --h1: clamp(24px, 3.2vw, 38px);
-  --h2: clamp(18px, 2.4vw, 22px);
+  --h2: clamp(18px, 2.1vw, 22px);
   --p: 14px;
 
-  /* сетка/контент */
-  --sidebarW: 148px;         /* ширина сайдбара */
-  --maxW: 1120px;            /* максимальная ширина контента на ПК */
-  --pagePad: 16px;
+  /* Spacing */
+  --gap8: 8px;
+  --gap12: 12px;
+  --gap16: 16px;
+  --gap18: 18px;
+  --gap22: 22px;
 }
 
-/* box sizing — чтобы textarea/кнопки не “плавали” */
 *,
 *::before,
-*::after{
-  box-sizing: border-box;
-}
+*::after{ box-sizing: border-box; }
 
-/* у WebView иногда “дёргается” скролл — сглаживаем */
-html{
-  -webkit-text-size-adjust: 100%;
-}
-
+html{ -webkit-text-size-adjust: 100%; }
 body{
-  margin: 0;
-  min-height: 100vh;
+  margin:0;
+  min-height:100vh;
   color: var(--text);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }

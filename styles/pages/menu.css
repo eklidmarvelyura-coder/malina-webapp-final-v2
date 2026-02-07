@@ -1,8 +1,7 @@
-/* ===========================================
-   MENU PAGE: sticky header + sticky footer
-   =========================================== */
+/* ======================================================
+   MENU PAGE — sticky header block + sticky footer
+   ====================================================== */
 
-/* sticky зона меню (header + категории) */
 .menu-sticky{
   position: sticky;
   top: 10px;
@@ -10,12 +9,7 @@
   margin-bottom: 14px;
 }
 
-/* фон sticky зоны — лёгкое стекло */
-.menu-sticky.glass{
-  padding: 0; /* padding внутри header/categories */
-}
-
-/* нижняя панель (кнопка оформления) */
+/* Footer with checkout button */
 .menu-footer{
   position: sticky;
   bottom: 12px;
@@ -23,7 +17,6 @@
   margin: 0 18px 12px;
   padding: 12px;
   border-radius: var(--r22);
-
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.12);
 }

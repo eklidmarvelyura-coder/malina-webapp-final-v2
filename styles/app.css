@@ -1,34 +1,32 @@
-/* ===========================================
-   APP LAYOUT: каркас (sidebar + content)
-   =========================================== */
+/* ======================================================
+   APP LAYOUT — sidebar + content (layout.js)
+   ====================================================== */
 
 .app{
-  display: flex;
-  min-height: 100vh;
+  display:flex;
+  min-height:100vh;
 }
 
 /* Sidebar */
 .sidebar{
   width: var(--sidebarW);
   padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display:flex;
+  flex-direction:column;
+  gap: var(--gap12);
 }
 
-/* Верхняя зона сайдбара */
+/* Верхняя зона навигации */
 .nav-top{
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display:flex;
+  flex-direction:column;
+  gap: var(--gap12);
 }
 
-/* “Бренд” */
 .brand{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap: 8px;
   padding: 12px 10px;
   border-radius: var(--r22);
   background: rgba(255,255,255,0.06);
@@ -37,48 +35,43 @@
   letter-spacing: 0.2px;
 }
 
-/* Навигационные кнопки */
+/* Кнопки навигации */
 .nav-item{
-  width: 100%;
-  border: 0;
-  cursor: pointer;
+  width:100%;
+  border:0;
+  cursor:pointer;
   padding: 12px 10px;
   border-radius: var(--r22);
   color: var(--text);
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.10);
-  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
-  text-align: center;
+  text-align:center;
+  transition: background 140ms ease, transform 120ms ease, border-color 140ms ease;
 }
 
 .nav-item:hover{
   background: rgba(255,255,255,0.09);
   border-color: rgba(255,255,255,0.14);
 }
-
-.nav-item:active{
-  transform: scale(0.99);
-}
+.nav-item:active{ transform: scale(0.99); }
 
 .nav-ico{ font-size: 20px; line-height: 1; }
-.nav-txt{ margin-top: 6px; font-size: 12px; opacity: 0.9; }
+.nav-txt{ margin-top: 6px; font-size: 12px; opacity: 0.92; }
 
-/* Нижняя зона сайдбара */
-.nav-bottom{
-  margin-top: auto;
-}
+/* Нижняя зона sidebar */
+.nav-bottom{ margin-top:auto; }
 
 /* Виджет корзины */
 .cart-widget{
   padding: 12px;
   border-radius: var(--r22);
-  cursor: pointer;
-  user-select: none;
+  cursor:pointer;
+  user-select:none;
 }
 
 .cart-row{
   display:flex;
-  justify-content: space-between;
+  justify-content:space-between;
   align-items:center;
   font-size: 12px;
   padding: 6px 0;
@@ -89,25 +82,20 @@
 
 /* Content */
 .content{
-  flex: 1;
-  padding: var(--pagePad);
-  display: flex;
-  justify-content: center; /* центрируем "страницу" на ПК */
+  flex:1;
+  padding: var(--pad);
+  display:flex;
+  justify-content:center;
 }
 
-/* Главный контейнер страниц */
+/* Место, куда страницы рендерятся */
 .page{
-  width: 100%;
+  width:100%;
   max-width: var(--maxW);
 }
 
-/* На очень широких экранах: чуть больше воздуха */
-@media (min-width: 1280px){
-  .content{ padding: 18px; }
-}
-
-/* На узких экранах: sidebar компактнее */
+/* Mobile tweaks */
 @media (max-width: 480px){
-  :root{ --sidebarW: 124px; }
+  :root{ --sidebarW: 132px; }
   .sidebar{ padding: 10px; }
 }
