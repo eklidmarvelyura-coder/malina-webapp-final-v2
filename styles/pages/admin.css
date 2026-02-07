@@ -1,0 +1,9 @@
+/* ===========================================
+   ADMIN / STAFF pages (base)
+   =========================================== */
+
+.admin-block{
+  margin: 0 18px;
+  padding: 16px;
+  border-radius: var(--r22);
+}

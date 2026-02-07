@@ -1,64 +1,29 @@
-/* styles/pages/menu.css */
+/* ===========================================
+   MENU PAGE: sticky header + sticky footer
+   =========================================== */
 
-/* Меню: страница НЕ стеклянная (иначе "стекло на стекле") */
-.menu-page{
-  width: 100%;
-}
-
-/* Sticky блок (шапка + категории) */
+/* sticky зона меню (header + категории) */
 .menu-sticky{
   position: sticky;
-  top: 0;
-  z-index: 20;
-
-  padding: 14px 14px 10px;
-  border-radius: 22px;
-  margin-bottom: 12px;
-
-  background: rgba(20,20,28,0.35);
-  border: 1px solid rgba(255,255,255,0.12);
+  top: 10px;
+  z-index: 30;
+  margin-bottom: 14px;
 }
 
-/* Список карточек */
-.grid{
-  display:flex;
-  flex-wrap:wrap;
-  gap: 18px;
-  justify-content: flex-start;
-
-  /* запас снизу, чтобы карточки не скрывались за кнопкой */
-  padding-bottom: 120px;
+/* фон sticky зоны — лёгкое стекло */
+.menu-sticky.glass{
+  padding: 0; /* padding внутри header/categories */
 }
 
-/* На узких экранах центрируем */
-@media (max-width: 640px){
-  .grid{ justify-content: center; }
-}
-
-/* Карточки фиксированного размера */
-.product-card{
-  width:300px;
-  max-width:300px;
-  border-radius:22px;
-  overflow:hidden;
-
-  /* Карточки слегка стеклянные, но БЕЗ blur (иначе артефакты) */
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-/* Низ — панель оформления (sticky) */
+/* нижняя панель (кнопка оформления) */
 .menu-footer{
   position: sticky;
   bottom: 12px;
-  z-index: 25;
-  margin-top: 12px;
-
+  z-index: 35;
+  margin: 0 18px 12px;
   padding: 12px;
-  border-radius: 22px;
+  border-radius: var(--r22);
 
-  background: rgba(20,20,28,0.35);
+  background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.12);
 }

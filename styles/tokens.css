@@ -1,34 +1,65 @@
+/* ============================
+   TOKENS: базовые переменные
+   ============================ */
+
 :root{
-  --bg0:#0b0b10;
-  --bg1:#141420;
+  /* базовые цвета */
+  --bg0: #0a0a12;
+  --bg1: #10121d;
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.70);
 
-  --text:#f5f5f7;
-  --muted: rgba(245,245,247,.72);
+  /* малиновая тема */
+  --malina: #ff3f7a;
+  --malina2: #ff5b90;
+  --malinaDeep: #a01352;
 
-  --malina:#ff3f7a;
-  --malinaDeep:#a01352;
+  /* нейтральные серые */
+  --grayA: rgba(255,255,255,0.12);
+  --grayB: rgba(255,255,255,0.16);
 
-  --glass: rgba(255,255,255,.08);
-  --glassBorder: rgba(255,255,255,.12);
+  /* стекло */
+  --glassBg: rgba(255,255,255,0.08);
+  --glassBg2: rgba(255,255,255,0.10);
+  --glassBorder: rgba(255,255,255,0.12);
 
-  --r16:16px;
-  --r22:22px;
-  --shadow: 0 20px 60px rgba(0,0,0,.35);
+  /* радиусы */
+  --r12: 12px;
+  --r16: 16px;
+  --r18: 18px;
+  --r22: 22px;
+  --r28: 28px;
 
-  --pad: 16px;
-  --maxw: 1120px;
+  /* тени */
+  --shadowSoft: 0 18px 55px rgba(0,0,0,0.35);
+  --shadowBtn: 0 18px 40px rgba(255,63,122,0.16);
+
+  /* типографика */
+  --h1: clamp(24px, 3.2vw, 38px);
+  --h2: clamp(18px, 2.4vw, 22px);
+  --p: 14px;
+
+  /* сетка/контент */
+  --sidebarW: 148px;         /* ширина сайдбара */
+  --maxW: 1120px;            /* максимальная ширина контента на ПК */
+  --pagePad: 16px;
 }
 
+/* box sizing — чтобы textarea/кнопки не “плавали” */
 *,
 *::before,
-*::after{ box-sizing: border-box; }
+*::after{
+  box-sizing: border-box;
+}
 
-html,body{ height:100%; }
+/* у WebView иногда “дёргается” скролл — сглаживаем */
+html{
+  -webkit-text-size-adjust: 100%;
+}
+
 body{
-  margin:0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  margin: 0;
+  min-height: 100vh;
   color: var(--text);
-  background: radial-gradient(1200px 600px at 10% 0%, rgba(255,63,122,.35), transparent 60%),
-              radial-gradient(900px 500px at 90% 10%, rgba(160,19,82,.28), transparent 55%),
-              linear-gradient(180deg, var(--bg1), var(--bg0));
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }

@@ -1,9 +1,32 @@
+/* ===========================================
+   THEME: фон и общий "малиново-стеклянный" стиль
+   =========================================== */
+
+/* Главный фон (и на Telegram, и на ПК) */
 body{
-  margin:0;
-  color:var(--text);
   background:
-    radial-gradient(1200px 600px at 20% 0%, rgba(255,77,109,0.25), transparent 60%),
-    radial-gradient(1000px 500px at 80% 20%, rgba(136,14,79,0.25), transparent 55%),
-    var(--bg);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    radial-gradient(1200px 700px at 18% 6%, rgba(255,63,122,0.34), transparent 60%),
+    radial-gradient(900px 560px at 85% 12%, rgba(160,19,82,0.26), transparent 58%),
+    radial-gradient(760px 480px at 30% 95%, rgba(255,91,144,0.18), transparent 55%),
+    linear-gradient(180deg, var(--bg1), var(--bg0));
+}
+
+/* Вспомогательные классы */
+.muted{ color: var(--muted); }
+
+/* Полноценное стекло: blur + фон + граница + тень */
+.glass{
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+  border: 1px solid var(--glassBorder);
+  border-radius: var(--r22);
+  box-shadow: var(--shadowSoft);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* Лёгкое стекло для вложенных элементов (без blur — меньше артефактов) */
+.glass-lite{
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: var(--r22);
 }

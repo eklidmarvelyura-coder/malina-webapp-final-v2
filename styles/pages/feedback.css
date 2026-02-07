@@ -1,18 +1,19 @@
+/* ===========================================
+   FEEDBACK PAGE
+   =========================================== */
+
 .feedback-form{
   display:flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 10px;
+  padding: 14px;
+  border-radius: var(--r22);
 }
 
 .feedback-form .input{
-  min-height: 140px;
   width: 100%;
-  resize: vertical;
 }
+
 .feedback-form .primary{
-  width: 100%;
-}
-.feedback-form .input{
   width: 100%;
 }

@@ -1,94 +1,258 @@
-/* Сетка карточек: адаптивная и аккуратная */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+/* ===========================================
+   COMPONENTS: кнопки, контролы, карточки, inputs
+   =========================================== */
+
+/* Заголовки/шапка */
+.page-header{
+  padding: 18px 18px 10px;
+}
+
+.page-header h1{
+  margin: 0;
+  font-size: var(--h1);
+  letter-spacing: -0.5px;
+}
+
+.page-header .muted{
+  margin: 6px 0 0;
+}
+
+/* Primary кнопка (малиновая) */
+.primary{
   width: 100%;
-}
-
-.product-card {
-  background: var(--glass);
-  border: 1px solid var(--glassBorder);
-  border-radius: var(--r22);
-  padding: 12px;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.product-card:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: translateY(-4px);
-}
-
-.card-img {
-  width: 100%;
-  aspect-ratio: 1/1;
-  object-fit: cover;
-  border-radius: 16px;
-}
-
-/* Кнопки */
-.primary {
+  border: 0;
+  cursor: pointer;
+  padding: 14px 14px;
+  border-radius: 18px;
+  color: white;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 0.2px;
   background: linear-gradient(135deg, var(--malina), var(--malinaDeep));
-  color: white;
-  border: none;
-  padding: 14px;
+  box-shadow: var(--shadowBtn);
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.primary:hover{ filter: brightness(1.03); }
+.primary:active{ transform: scale(0.99); }
+.primary:disabled{ opacity: 0.55; cursor: not-allowed; }
+
+/* Категории (chips) */
+.categories{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 0 18px 12px;
+}
+
+.cat-btn{
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  padding: 9px 12px;
   border-radius: 16px;
-  font-weight: 700;
+  cursor:pointer;
+  font-size: 13px;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.cat-btn:hover{
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.cat-btn.active{
+  background: linear-gradient(135deg, var(--malina), var(--malinaDeep));
+  border: 0;
+}
+
+/* Grid карточек */
+.grid{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: flex-start;
+  padding: 0 18px 130px; /* запас под нижний sticky футер */
+}
+
+/* На телефоне — по центру */
+@media (max-width: 640px){
+  .grid{ justify-content: center; }
+}
+
+/* Карточка товара */
+.product-card{
+  width: 300px;
+  border-radius: var(--r22);
+  overflow: hidden;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+/* Кликабельная зона карточки */
+.card-click{
+  padding: 12px;
   cursor: pointer;
-  transition: opacity 0.2s;
 }
 
-.primary:active { transform: scale(0.97); }
-
-.ctrl-btn {
-  background: var(--glass);
-  border: 1px solid var(--glassBorder);
-  color: white;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  cursor: pointer;
+.card-img{
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 18px;
 }
 
-.ctrl-btn.active-malina {
-    background: var(--malina);
+.card-title{
+  margin: 10px 0 6px;
+  font-size: 20px;
+  letter-spacing: -0.2px;
 }
-.modal {
+
+.price{
+  font-weight: 900;
+  opacity: 0.95;
+}
+
+/* Контролы +/− */
+.controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 12px;
+  padding: 12px 12px 16px;
+}
+
+.ctrl-btn{
+  width: 46px;
+  height: 46px;
+  border:0;
+  border-radius: 18px;
+  cursor:pointer;
+  color:white;
+  font-size: 20px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--malina), var(--malinaDeep));
+  box-shadow: 0 16px 34px rgba(255,63,122,0.18);
+  transition: transform 120ms ease, filter 120ms ease;
+}
+.ctrl-btn:hover{ filter: brightness(1.03); }
+.ctrl-btn:active{ transform: scale(0.98); }
+
+.ctrl-count{
+  min-width: 22px;
+  text-align:center;
+  font-weight: 900;
+  font-size: 16px;
+}
+
+/* Input/textarea */
+.input{
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  border-radius: 18px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  outline: none;
+}
+.input:focus{
+  border-color: rgba(255,63,122,0.55);
+}
+
+/* ===========================================
+   MODAL (стабильный для Telegram WebView)
+   =========================================== */
+
+.modal.hidden{ display:none; }
+
+.modal{
   position: fixed;
   inset: 0;
-  display: flex;
-  align-items: flex-end; /* Выезжает снизу */
-  justify-content: center;
-  z-index: 1000;
-  visibility: hidden;
+  z-index: 9999;
   opacity: 0;
-  transition: all 0.3s ease;
+  pointer-events: none;
+  transition: opacity 200ms ease;
 }
 
-.modal.active {
-  visibility: visible;
+.modal.active{
   opacity: 1;
+  pointer-events: auto;
 }
 
-.modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+/* фон — без blur (иначе "рывки" на WebView) */
+.modal-backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(10, 10, 16, 0.55);
 }
 
-.modal-sheet {
-  position: relative;
+/* стекло — на sheet */
+.modal-sheet{
+  position:absolute;
+  left:50%;
+  bottom: 0;
+  transform: translateX(-50%) translateY(18px);
+  width: min(520px, 100%);
+  border-radius: 26px 26px 0 0;
+  padding: 14px;
+  box-shadow: 0 -24px 60px rgba(0,0,0,0.35);
+
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  transition: transform 200ms cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+
+.modal.active .modal-sheet{
+  transform: translateX(-50%) translateY(0);
+}
+
+.modal-close{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:36px;
+  height:36px;
+  border-radius: 999px;
+  border:0;
+  cursor:pointer;
+  color: rgba(255,255,255,0.9);
+  background: rgba(0,0,0,0.35);
+}
+
+.modal-image{
   width: 100%;
-  max-width: 500px;
-  background: rgba(30, 30, 40, 0.95);
-  border-top: 1px solid var(--malina);
-  border-radius: 30px 30px 0 0;
-  padding: 24px;
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 200px;
+  object-fit: cover;
+  border-radius: 18px;
 }
 
-.modal.active .modal-sheet {
-  transform: translateY(0);
+.modal-title{
+  margin: 10px 0 6px;
+  font-size: 22px;
 }
+
+.modal-desc{
+  margin: 0 0 10px;
+  color: rgba(255,255,255,0.86);
+}
+
+.modal-row{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  gap: 12px;
+}
+
+.modal-price{
+  font-weight: 900;
+  font-size: 20px;
+}
+
+/* счётчик в модалке — белый */
+.modal .ctrl-count{ color: #fff; }

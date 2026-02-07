@@ -1,0 +1,30 @@
+/* ===========================================
+   CART PAGE
+   =========================================== */
+
+.cart-footer{
+  position: sticky;
+  bottom: 12px;
+  z-index: 35;
+  margin: 0 18px 12px;
+  padding: 12px;
+  border-radius: var(--r22);
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.cart-total-row{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+/* Пустая корзина */
+.empty{
+  margin: 0 18px;
+  padding: 16px;
+  border-radius: var(--r22);
+}
