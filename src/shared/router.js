@@ -41,6 +41,22 @@ export function navigate(route, ctx) {
 
   // --- (4) render страницы ---
   ctx?.render?.(route);
+  // --- FIX: при навигации сбрасываем скролл ---
+  // Иначе при переходе (например menu -> cart) остаётся старая прокрутка,
+  // и кажется, что корзина "открылась снизу".
+  try {
+    // 1) если есть отдельный scroll-container (иногда так делают) — сбросим его
+    if (ctx?.content && typeof ctx.content.scrollTop === "number") {
+      ctx.content.scrollTop = 0;
+    }
+
+    // 2) основной скролл документа (самый частый случай)
+    const scroller = document.scrollingElement || document.documentElement;
+    scroller.scrollTop = 0;
+
+    // 3) подстраховка
+    window.scrollTo(0, 0);
+  } catch (_) {}
 
   // --- page-enter анимация на контейнере контента ---
   // Делаем после render, чтобы класс применялся к уже вставленному DOM
