@@ -1,8 +1,9 @@
+import { renderHeader } from "../../../shared/ui/header.js";
 import { PRODUCTS, PRODUCT_BY_ID, CATEGORIES } from "../../../shared/data/products.js";
 import { ProductCard } from "../../../shared/components/productCard.js";
 import { createProductModal } from "../../../shared/components/modal.js";
 import { calcCartTotal } from "../../../shared/utils/cartTotals.js";
-import { renderHeader } from "../../../shared/ui/header.js";
+
 
 let modalController = null;
 let currentCategory = "all";
