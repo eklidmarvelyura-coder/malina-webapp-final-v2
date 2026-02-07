@@ -1,5 +1,5 @@
 /* ======================================================
-   APP LAYOUT — polished v4
+   APP LAYOUT — sidebar sticky on mobile + polished
    ====================================================== */
 
 .app{
@@ -14,7 +14,20 @@
   display:flex;
   flex-direction:column;
   gap: 12px;
+
+  /* ключевое: sidebar всегда в видимой зоне */
+  position: sticky;
+  top: 10px;
+  align-self: flex-start;
+
+  /* чтобы sticky работал корректно и сайдбар не “растягивался” */
+  height: calc(100vh - 20px);
+  overflow: auto;
 }
+
+/* чтобы скролл сайдбара не выглядел ужасно на ПК */
+.sidebar::-webkit-scrollbar{ width: 6px; }
+.sidebar::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.12); border-radius: 10px; }
 
 .nav-top{
   display:flex;
@@ -34,7 +47,6 @@
   letter-spacing: 0.2px;
 }
 
-/* nav items */
 .nav-item{
   width:100%;
   border:0;
@@ -54,7 +66,6 @@
 }
 .nav-item:active{ transform: scale(0.99); }
 
-/* active state (если добавишь класс в JS) */
 .nav-item.active{
   background: linear-gradient(135deg, rgba(255,63,122,0.35), rgba(160,19,82,0.25));
   border-color: rgba(255,63,122,0.45);
@@ -65,7 +76,6 @@
 
 .nav-bottom{ margin-top:auto; }
 
-/* Cart widget */
 .cart-widget{
   padding: 12px;
   border-radius: var(--r22);
@@ -100,5 +110,5 @@
 /* Mobile */
 @media (max-width: 480px){
   :root{ --sidebarW: 132px; }
-  .sidebar{ padding: 10px; }
+  .sidebar{ padding: 10px; top: 8px; height: calc(100vh - 16px); }
 }
