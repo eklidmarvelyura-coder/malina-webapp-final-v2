@@ -254,6 +254,7 @@ export function renderCheckoutPage(ctx) {
       };
 
       // ✅ один id и для payload, и для истории, и для рейтинга
+      // ✅ один id и для payload, и для истории
       const orderId = "MAL-" + payload.createdAt;
       payload.orderId = orderId;
 
@@ -261,13 +262,10 @@ export function renderCheckoutPage(ctx) {
       if (tg?.sendData) tg.sendData(JSON.stringify(payload));
       else console.log("ORDER PAYLOAD:", payload);
 
-      // 2) сохраняем “последний заказ” для рейтинга (1 оценка на 1 заказ)
-      // В feedback.js мы проверяем:
-      // - lastOrderId (последний заказ)
-      // - ratedOrderId (какой заказ уже оценён)
-      // если ratedOrderId === lastOrderId → рейтинг заблокирован до нового заказа
+      // ✅ ДЛЯ РЕЙТИНГА (1 раз на заказ)
       const userKey = tgUser?.id ? String(tgUser.id) : "anon";
       localStorage.setItem(`malina:lastOrder:${userKey}`, String(orderId));
+
 
       // 3) сохраняем локально в историю (ordersStore)
       // Это нужно для будущей "Истории заказов" и статусов

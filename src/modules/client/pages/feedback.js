@@ -1,16 +1,13 @@
 // src/modules/client/pages/feedback.js
-// Связь (упрощённо и по делу):
-// - рейтинг доступен только 1 раз на 1 заказ
+// Связь (минимально, без тавтологии):
+// - рейтинг: 1 раз на каждый новый заказ
 // - сообщение владельцу
-// - кнопки “Отправить” и “Написать в Telegram” — одинаковые малиновые
+// - обе кнопки одинаковые (primary)
 //
-// Рейтинг:
-// - lastOrderId берём из localStorage (устанавливается при успешном заказе)
-// - ratedOrderId хранит, какой заказ уже оценён
-// - если ratedOrderId === lastOrderId → рейтинг заблокирован до нового заказа
-//
-// При выставлении рейтинга отправляем payload в бот:
-// { type:"rating", orderId, stars, user:{username...} }
+// Логика рейтинга:
+// lastOrderId = id последнего заказа (ставим в checkout.js)
+// ratedOrderId = id заказа, который уже оценён
+// ratingStars = выбранные звёзды (чтобы показывать, что клиент ставил)
 
 import { renderHeader } from "../../../shared/ui/header.js";
 import { toast } from "../../../shared/components/toast.js";
@@ -56,9 +53,14 @@ export function renderFeedbackPage(ctx) {
   const tgUser = getTgUser(tg);
   const userKey = tgUser?.id ? String(tgUser.id) : "anon";
 
-  // ✅ Рейтинг: 1 раз на заказ
-  const lastOrderId = localStorage.getItem(`malina:lastOrder:${userKey}`);   // ставим в checkout
-  const ratedOrderId = localStorage.getItem(`malina:ratedOrder:${userKey}`); // ставим после оценки
+  // ✅ читаем “последний заказ” и “уже оцененный заказ”
+  const lastOrderId = localStorage.getItem(`malina:lastOrder:${userKey}`);     // ставим в checkout.js
+  const ratedOrderId = localStorage.getItem(`malina:ratedOrder:${userKey}`);  // ставим после клика
+  const savedStars = Number(localStorage.getItem(`malina:ratingStars:${userKey}`) || 0);
+
+  // Можно оценить, если:
+  // - есть последний заказ
+  // - и этот последний заказ ещё не оценён
   const canRate = !!lastOrderId && ratedOrderId !== lastOrderId;
 
   content.innerHTML = `
@@ -67,31 +69,21 @@ export function renderFeedbackPage(ctx) {
     </div>
 
     <div class="feedback-wrap">
-      <!-- Рейтинг -->
       <div class="glass-lite feedback-card">
         <div class="fb-row">
           <div>
             <div class="fb-title">Оценка</div>
-            <div class="muted fb-sub">
-              ${
-                canRate
-                  ? "Оценку можно поставить один раз после каждого заказа"
-                  : lastOrderId
-                    ? "Вы уже оценили последний заказ. Новая оценка будет доступна после следующего заказа."
-                    : "Оценка станет доступна после оформления заказа."
-              }
-            </div>
+            <div class="muted fb-sub" id="rateHint"></div>
           </div>
 
-          <div class="fb-stars ${canRate ? "" : "disabled"}" id="fbStars" aria-label="rating">
+          <div class="fb-stars ${canRate ? "" : "disabled"}" id="fbStars">
             ${[1,2,3,4,5].map(n => `
-              <button class="star" data-star="${n}" type="button" aria-label="${n} stars">★</button>
+              <button class="star" data-star="${n}" type="button">★</button>
             `).join("")}
           </div>
         </div>
       </div>
 
-      <!-- Сообщение владельцу -->
       <div class="glass-lite feedback-card">
         <div class="fb-title">Сообщение владельцу</div>
         <div class="muted fb-sub">Идеи, пожелания, замечания — всё читаем</div>
@@ -104,7 +96,8 @@ export function renderFeedbackPage(ctx) {
         </div>
 
         <div class="muted fb-hint">
-          Мы используем профиль Telegram для идентификации. Телефон Telegram автоматически не отдаёт — позже добавим запрос контакта через бота.
+          Профиль берём из Telegram. Телефон Telegram автоматически не отдаёт —
+          позже добавим запрос контакта через бота.
         </div>
       </div>
     </div>
@@ -112,11 +105,18 @@ export function renderFeedbackPage(ctx) {
 
   renderHeader(content.querySelector("#feedbackHeader"), { subtitle: "Связь" });
 
-  // -------------------------
-  // ⭐ Rating
-  // -------------------------
+  // ---------- рейтинг ----------
   const starsWrap = content.querySelector("#fbStars");
-  let selected = 0;
+  const hintEl = content.querySelector("#rateHint");
+
+  // текст подсказки
+  if (!lastOrderId) {
+    hintEl.textContent = "Оценка станет доступна после оформления заказа.";
+  } else if (!canRate) {
+    hintEl.textContent = "Вы уже оценили последний заказ. Новая оценка появится после следующего заказа.";
+  } else {
+    hintEl.textContent = "Можно поставить оценку один раз после каждого заказа.";
+  }
 
   function paintStars(value) {
     starsWrap.querySelectorAll(".star").forEach((btn) => {
@@ -125,23 +125,33 @@ export function renderFeedbackPage(ctx) {
     });
   }
 
+  // показываем сохранённую оценку, если она есть
+  if (savedStars > 0) paintStars(savedStars);
+
+  // клик по звёздам
   starsWrap.onclick = (e) => {
-    if (!canRate) return;
+    if (!canRate) return; // уже оценивал — блок
 
     const btn = e.target.closest(".star");
     if (!btn) return;
 
-    selected = Number(btn.dataset.star);
-    paintStars(selected);
+    const stars = Number(btn.dataset.star);
 
-    // ✅ сохраняем, что этот заказ уже оценён
+    // ✅ фиксируем оценку: 1 раз на последний заказ
     localStorage.setItem(`malina:ratedOrder:${userKey}`, String(lastOrderId));
+    localStorage.setItem(`malina:ratingStars:${userKey}`, String(stars));
 
-    // ✅ отправляем в бота (дальше бот пишет админу)
+    paintStars(stars);
+
+    // ✅ сразу блокируем UI, чтобы нельзя было менять “в этом же заказе”
+    starsWrap.classList.add("disabled");
+    hintEl.textContent = "Спасибо! Оценка сохранена. Изменить можно после следующего заказа.";
+
+    // ✅ payload в бота (бот потом уведомит админа)
     const payload = {
       type: "rating",
-      orderId: Number(lastOrderId),
-      stars: selected,
+      orderId: String(lastOrderId),
+      stars,
       createdAt: Date.now(),
       user: tgUser,
     };
@@ -149,19 +159,14 @@ export function renderFeedbackPage(ctx) {
     if (tg?.sendData) tg.sendData(JSON.stringify(payload));
     else console.log("RATING PAYLOAD:", payload);
 
-    toast.success("Спасибо за оценку ❤️"); // можно потом заменить на более нейтральное сообщение, если не хотим акцентировать внимание на сердечках :)
+    toast.success("Спасибо за оценку ❤️");
   };
 
-  // -------------------------
-  // 💬 Message
-  // -------------------------
+  // ---------- сообщение владельцу ----------
   const fbText = content.querySelector("#fbText");
-  const sendBtn = content.querySelector("#fbSendBtn");
-  const ownerBtn = content.querySelector("#fbOwnerBtn");
+  content.querySelector("#fbOwnerBtn").onclick = () => openOwnerChat(tg);
 
-  ownerBtn.onclick = () => openOwnerChat(tg);
-
-  sendBtn.onclick = () => {
+  content.querySelector("#fbSendBtn").onclick = () => {
     const text = fbText.value.trim();
     if (!text) {
       toast.error("Напиши сообщение 🙂");
