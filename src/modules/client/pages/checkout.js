@@ -5,7 +5,10 @@
 // - доставка требует гео: кнопка отправки активна только при geo
 // - самовывоз запрещён, если в заказе есть category === "coffee"
 // - отправка payload в tg.sendData()
-// - после отправки: clear корзины + success page
+// - после отправки:
+//    1) сохраняем lastOrderId в localStorage (для рейтинга: 1 оценка на заказ)
+//    2) пишем заказ в локальную историю
+//    3) очищаем корзину + success page
 
 import { renderHeader } from "../../../shared/ui/header.js";
 import { PRODUCT_BY_ID } from "../../../shared/data/products.js";
@@ -20,6 +23,7 @@ function buildOrder(cartItems) {
     const qty = Number(cartItems[id] || 0);
     if (qty <= 0) continue;
 
+    // PRODUCT_BY_ID у тебя лежит по строковым ключам
     const p = PRODUCT_BY_ID[String(id)];
     if (!p) continue;
 
@@ -239,43 +243,53 @@ export function renderCheckoutPage(ctx) {
 
       const tgUser = getTgUser(tg);
 
+      // ✅ Payload заказа (то, что потом примет бот)
       const payload = {
-  type: "order",
-  createdAt: Date.now(),
-  mode: pageState.mode,
-  user: tgUser,
-  geo: pageState.geo, // может быть null (если pickup)
-  order,              // items + total
-};
+        type: "order",
+        createdAt: Date.now(),
+        mode: pageState.mode,
+        user: tgUser,
+        geo: pageState.geo, // может быть null (если pickup)
+        order,              // items + total
+      };
 
-// ✅ один id и для payload, и для истории
-const orderId = "MAL-" + payload.createdAt;
-payload.orderId = orderId;
+      // ✅ один id и для payload, и для истории, и для рейтинга
+      const orderId = "MAL-" + payload.createdAt;
+      payload.orderId = orderId;
 
-// 1) отправляем в Telegram (боту/серверу)
-if (tg?.sendData) tg.sendData(JSON.stringify(payload));
-else console.log("ORDER PAYLOAD:", payload);
+      // 1) отправляем в Telegram (боту/серверу)
+      if (tg?.sendData) tg.sendData(JSON.stringify(payload));
+      else console.log("ORDER PAYLOAD:", payload);
 
-// 2) сохраняем локально в историю
-store.orders.actions.add({
-  id: orderId,
-  createdAt: payload.createdAt,
-  status: "Отправлен",
-  mode: payload.mode,
-  total: payload.order.total,
-  items: payload.order.items.map((x) => ({
-    id: x.id,
-    name: x.name,
-    qty: x.qty,
-    sum: x.sum,
-  })),
-  user: payload.user,
-  geo: payload.geo,
-});
+      // 2) сохраняем “последний заказ” для рейтинга (1 оценка на 1 заказ)
+      // В feedback.js мы проверяем:
+      // - lastOrderId (последний заказ)
+      // - ratedOrderId (какой заказ уже оценён)
+      // если ratedOrderId === lastOrderId → рейтинг заблокирован до нового заказа
+      const userKey = tgUser?.id ? String(tgUser.id) : "anon";
+      localStorage.setItem(`malina:lastOrder:${userKey}`, String(orderId));
+
+      // 3) сохраняем локально в историю (ordersStore)
+      // Это нужно для будущей "Истории заказов" и статусов
+      store.orders.actions.add({
+        id: orderId,
+        createdAt: payload.createdAt,
+        status: "Отправлен",
+        mode: payload.mode,
+        total: payload.order.total,
+        items: payload.order.items.map((x) => ({
+          id: x.id,
+          name: x.name,
+          qty: x.qty,
+          sum: x.sum,
+        })),
+        user: payload.user,
+        geo: payload.geo,
+      });
 
       toast.success("Заказ отправлен ✅");
 
-      // очищаем корзину и уходим на success
+      // 4) очищаем корзину и уходим на success
       store.cart.actions.clear();
       navigate("success", ctx);
     };
